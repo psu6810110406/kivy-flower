@@ -233,63 +233,70 @@ class FlowerApp(App):
         self.root.current = "game"
         
     def show_how_to_play(self):
-        from kivy.uix.floatlayout import FloatLayout
-        from kivy.graphics import Color, RoundedRectangle
+        # สร้าง Layout หลัก
+        content = BoxLayout(orientation='vertical', padding=25, spacing=15)
         
-        # 2. เนื้อหาข้างใน
-        content_box = BoxLayout(orientation='vertical', padding=20, spacing=15)
-        
-        # หัวข้อที่ดูน่ารัก
+        # --- 1. ส่วนหัว (Header) ---
         header = Label(
-            text="🌿 วิธีดูแลสวนในอพาร์ตเมนต์ 🌿",
+            text="[color=2E7D32][b]MANUAL: APARTMENT GARDENER[/b][/color]",
+            markup=True,
             font_name='assets/fonts/font.ttf',
-            font_size='28sp',
-            color=(0.2, 0.5, 0.2, 1), # สีเขียวธรรมชาติ
-            bold=True,
-            size_hint_y=0.2
+            font_size='32sp',
+            size_hint_y=0.15
         )
-        
-        # รายละเอียด (จัดให้อ่านง่ายขึ้น)
-        instructions = Label(
-            text=(
-                "• [b]Stamina:[/b] ใช้พลังงานรดน้ำ/ใส่ปุ๋ย\n"
-                "• [b]Growth:[/b] ครบ 100% ดอกไม้จะบานสะพรั่ง\n"
-                "• [b]Shop:[/b] ใช้เงินซื้อเมล็ดพันธุ์ใหม่ๆ\n"
-                "• [b]Tip:[/b] ใช้ 2 นิ้วซูมหรือลากต้นไม้ได้อิสระ!"
-            ),
-            font_name='assets/fonts/font.ttf',
-            font_size='20sp',
-            color=(0.3, 0.3, 0.3, 1), # สีเทาเข้มอ่านง่าย
-            markup=True, # เปิดใช้งาน [b] ตัวหนา
-            halign='left',
-            valign='middle'
-        )
-        instructions.bind(size=instructions.setter('text_size'))
+        content.add_widget(header)
 
-        # ปุ่มปิดที่ดูละมุน
+        # --- 2. ส่วนเนื้อหาแบบละเอียด (Detailed Info) ---
+        # ใช้ GridLayout เพื่อจัดวางไอคอนและคำอธิบาย
+        grid = GridLayout(cols=1, spacing=10, size_hint_y=0.7)
+        
+        def add_info_row(title, desc):
+            row = BoxLayout(orientation='vertical', spacing=2)
+            row.add_widget(Label(
+                text=f"[color=388E3C][b]• {title}[/b][/color]",
+                markup=True, font_name='assets/fonts/font.ttf',
+                font_size='22sp', halign='left', size_hint_x=1
+            ))
+            row.add_widget(Label(
+                text=desc,
+                font_name='assets/fonts/font.ttf',
+                font_size='18sp', color=(0.4, 0.4, 0.4, 1),
+                halign='left', size_hint_x=1
+            ))
+            grid.add_widget(row)
+
+        add_info_row("ระบบพลังงาน (Stamina)", 
+                     "การกระทำทุกอย่างใช้พลังงาน หากหมดต้องกด 'พักผ่อน' เพื่อเริ่มวันใหม่")
+        add_info_row("ปัจจัยการเติบโต (Growth Factors)", 
+                     "พืชแต่ละชนิดชอบ 'แดด' และ 'น้ำ' ต่างกัน สังเกตจากสภาพอากาศในแต่ละวัน")
+        add_info_row("การจัดการสวน (Gallery Mode)", 
+                     "ลากดอกไม้ที่ปลูกเสร็จแล้วไปวางบนชั้น และคลิกขวาเพื่อฉีดน้ำทำความสะอาด")
+        add_info_row("เศรษฐกิจ (Economy)", 
+                     "ปลูกดอกไม้สำเร็จเพื่อรับเงินรางวัล และนำไปซื้อเมล็ดพันธุ์หายากใน Shop")
+
+        content.add_widget(grid)
+
+        # --- 3. ส่วนท้ายและปุ่มปิด (Footer) ---
+        btn_layout = BoxLayout(size_hint_y=0.15, padding=[40, 0])
         close_btn = Button(
-            text="เข้าใจแล้วจ้า",
+            text="เข้าสู่สวนของคุณ",
             font_name='assets/fonts/font.ttf',
-            size_hint=(0.6, 0.2),
-            pos_hint={'center_x': 0.5},
-            background_normal='', # ลบสีเทาเดิม
-            background_color=(0.4, 0.7, 0.4, 1), # สีเขียวอ่อนน่ารัก
+            font_size='22sp',
+            background_normal='',
+            background_color=(0.18, 0.49, 0.2, 1), # เขียวเข้ม Forest Green
             color=(1, 1, 1, 1)
         )
+        btn_layout.add_widget(close_btn)
+        content.add_widget(btn_layout)
 
-        content_box.add_widget(header)
-        content_box.add_widget(instructions)
-        content_box.add_widget(close_btn)
-
-        # สร้าง Popup โดยซ่อนพื้นหลังเดิม (Background) เพื่อใช้ดีไซน์ที่เราสร้างเอง
+        # สร้าง Popup แบบไร้ขอบเดิม (Custom Styling)
         popup = Popup(
-            title="Apartment Garden Guide",
-            content=content_box,
-            size_hint=(0.8, 0.7),
-            title_font='assets/fonts/font.ttf',
-            title_align='center',
-            separator_color=(0.4, 0.7, 0.4, 1), # สีเส้นคั่น
-            background_color=(1, 1, 1, 0.95) # พื้นหลังขาวนวล
+            title="", # ซ่อน Title เดิม
+            separator_height=0, # ซ่อนเส้นคั่นเดิม
+            content=content,
+            size_hint=(0.85, 0.85),
+            background='assets/images/ui_bg.png', # ใช้รูปสวนจางๆ เป็นพื้นหลัง Popup
+            background_color=(1, 1, 1, 0.9) # ปรับความสว่างให้เนื้อหาอ่านง่าย
         )
         
         close_btn.bind(on_release=popup.dismiss)
