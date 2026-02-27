@@ -66,7 +66,7 @@ class GameScreen(Screen):
 
     def reset_game(self):
         self.growth_progress = 0
-        self.flower_image_source = f"{self.current_flower}_0.png"
+        self.flower_image_source = f"assets/images/{self.current_flower}_0.png"
         self.ids.result_lbl.text = "เริ่มปลูกต้นไม้กันเลย!"
         # จัดตำแหน่งต้นไม้กลับตรงกลางเมื่อเริ่มด่านใหม่
         self.ids.flower_scatter.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
@@ -74,13 +74,13 @@ class GameScreen(Screen):
     def on_growth_change(self, instance, value):
         # เปลี่ยนรูปภาพอัตโนมัติตามความเติบโต
         if value >= 100:
-            self.flower_image_source = f"{self.current_flower}_3.png"
+            self.flower_image_source = f"assets/images/{self.current_flower}_3.png"
         elif value >= 60:
-            self.flower_image_source = f"{self.current_flower}_2.png"
+            self.flower_image_source = f"assets/images/{self.current_flower}_2.png"
         elif value >= 30:
-            self.flower_image_source = f"{self.current_flower}_1.png"
+            self.flower_image_source = f"assets/images/{self.current_flower}_1.png"
         else:
-            self.flower_image_source = f"{self.current_flower}_0.png"
+            self.flower_image_source = f"assets/images/{self.current_flower}_0.png"
 
     # Action Callbacks ตอบสนองต่อปุ่ม
     def water_plant(self):
