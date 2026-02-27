@@ -177,13 +177,13 @@ class FlowerApp(App):
         box = BoxLayout(orientation='vertical', padding=10, spacing=10)
         box.add_widget(Label(
             text="วิธีเล่น:\n1. ใช้พลังงานเพื่อรดน้ำ ใส่ปุ๋ย หรือพรวนดิน\n2. หลอดการเติบโต ProgressBar ครบ 100% จะได้ดอกไม้\n3. เงินใช้อัปเกรดหรือซื้อเมล็ดเพิ่มเติม\n4. สามารถซูม/ย้ายต้นไม้ด้้วย Scatter Widget",
-            font_name='font.ttf', 
+            font_name='assets/fonts/font.ttf', 
             font_size='18sp'
         ))
-        close_btn = Button(text="ปิดหน้าต่าง", font_name='font.ttf', size_hint_y=None, height=50)
+        close_btn = Button(text="ปิดหน้าต่าง", font_name='assets/fonts/font.ttf', size_hint_y=None, height=50)
         box.add_widget(close_btn)
         
-        popup = Popup(title="วิธีการเล่น (Settings)", content=box, size_hint=(0.8, 0.6), title_font='font.ttf')
+        popup = Popup(title="วิธีการเล่น (Settings)", content=box, size_hint=(0.8, 0.6), title_font='assets/fonts/font.ttf')
         close_btn.bind(on_release=popup.dismiss)
         popup.open()
 

@@ -13,7 +13,7 @@ WindowManager:
     FloatLayout:
         # พื้นหลัง
         Image:
-            source: "assets/flower_bg.png" # สมมติว่ามีรูปพื้นหลัง
+            source: "assets/images/ui_bg.png" # สมมติว่ามีรูปพื้นหลัง
             allow_stretch: True
             keep_ratio: False
             size_hint: 1, 1
@@ -28,7 +28,7 @@ WindowManager:
 
             Label:
                 text: "เกมปลูกดอกไม้"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 font_size: '40sp'
                 color: 1, 1, 1, 1
                 outline_width: 2
@@ -36,7 +36,7 @@ WindowManager:
             
             Button:
                 text: "เริ่มเกม (เลือกด่าน)"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 font_size: '24sp'
                 size_hint_y: None
                 height: 80
@@ -44,7 +44,7 @@ WindowManager:
                 
             Button:
                 text: "สมุดสะสมดอกไม้"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 font_size: '24sp'
                 size_hint_y: None
                 height: 80
@@ -52,7 +52,7 @@ WindowManager:
 
             Button:
                 text: "ร้านค้า (Shop)"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 font_size: '24sp'
                 size_hint_y: None
                 height: 80
@@ -60,7 +60,7 @@ WindowManager:
                 
             Button:
                 text: "วิธีการเล่น / ตั้งค่า"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 font_size: '24sp'
                 size_hint_y: None
                 height: 80
@@ -76,7 +76,7 @@ WindowManager:
 
         Label:
             text: "เลือกดอกไม้ที่ต้องการปลูก"
-            font_name: 'font.ttf'
+            font_name: 'assets/fonts/font.ttf'
             font_size: '30sp'
             size_hint_y: None
             height: 50
@@ -88,28 +88,28 @@ WindowManager:
             
             Button:
                 text: "กุหลาบ"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 on_release: app.start_game("rose")
             Button:
                 text: "ทิวลิป"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 on_release: app.start_game("tulip")
             Button:
                 text: "เดซี่"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 on_release: app.start_game("daisy")
             Button:
                 text: "ทานตะวัน"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 on_release: app.start_game("sunflower")
             Button:
                 text: "ชบา"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 on_release: app.start_game("hibiscus")
 
         Button:
             text: "กลับเมนูหลัก"
-            font_name: 'font.ttf'
+            font_name: 'assets/fonts/font.ttf'
             size_hint_y: None
             height: 60
             on_release: app.root.current = "menu"
@@ -121,23 +121,6 @@ WindowManager:
         orientation: 'vertical'
         padding: 15
         spacing: 10
-
-        /* ส่วนหัวแสดงสถานะต่างๆ
-        BoxLayout:
-            orientation: 'horizontal'
-            size_hint_y: None
-            height: 50
-            spacing: 10
-
-            Label:
-                text: f"เงิน: {app.money} บาท"
-                font_name: 'font.ttf'
-                font_size: '20sp'
-            Label:
-                text: f"พลังงาน (Stamina): {app.stamina}"
-                font_name: 'font.ttf'
-                font_size: '20sp'
-        */
 
         GridLayout:
             cols: 3
@@ -152,19 +135,19 @@ WindowManager:
             
             Label:
                 text: f"💰 {app.money}"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
             Label:
                 text: f"⚡ {app.stamina}"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
             Label:
                 text: f"☁️ {app.weather}" # Widget ใหม่: สภาพอากาศ
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 color: 1, 0.8, 0, 1
 
         Label:
             id: title_lbl
             text: "กำลังปลูก..."
-            font_name: 'font.ttf'
+            font_name: 'assets/fonts/font.ttf'
             font_size: '22sp'
             size_hint_y: None
             height: 40
@@ -213,29 +196,29 @@ WindowManager:
             
             Button:
                 text: "รดน้ำ"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 background_color: 0.2, 0.4, 0.8, 1
                 on_release: root.water_plant()
             Button:
                 text: "ใส่ปุ๋ย"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 background_color: 0.8, 0.6, 0.2, 1
                 on_release: root.fertilize_plant()
             Button:
                 text: "พรวนดิน"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 background_color: 0.5, 0.3, 0.1, 1
                 on_release: root.till_soil()
             Button:
                 text: "พักผ่อน (ข้ามวัน)"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 background_color: 0.2, 0.8, 0.6, 1
                 on_release: app.next_day()
 
         Label:
             id: result_lbl
             text: "รอดูผลการดูแล..."
-            font_name: 'font.ttf'
+            font_name: 'assets/fonts/font.ttf'
             font_size: '20sp'
             size_hint_y: None
             height: 40
@@ -251,7 +234,7 @@ WindowManager:
 
         Button:
             text: "ยอมแพ้ / กลับหน้าเลือกด่าน"
-            font_name: 'font.ttf'
+            font_name: 'assets/fonts/font.ttf'
             size_hint_y: None
             height: 40
             background_color: 0.8, 0.2, 0.2, 1
@@ -267,7 +250,7 @@ WindowManager:
 
         Label:
             text: "ดอกไม้ที่คุณปลูกสำเร็จ"
-            font_name: 'font.ttf'
+            font_name: 'assets/fonts/font.ttf'
             font_size: '30sp'
             size_hint_y: None
             height: 50
@@ -275,12 +258,12 @@ WindowManager:
         Label:
             id: collection_lbl
             text: "ยังไม่มีดอกไม้เลย ไปปลูกกันเถอะ!"
-            font_name: 'font.ttf'
+            font_name: 'assets/fonts/font.ttf'
             font_size: '20sp'
 
         Button:
             text: "กลับเมนูหลัก"
-            font_name: 'font.ttf'
+            font_name: 'assets/fonts/font.ttf'
             size_hint_y: None
             height: 60
             on_release: app.root.current = "menu"
@@ -295,7 +278,7 @@ WindowManager:
 
         Label:
             text: f"ร้านค้าเมล็ดพันธุ์ (เงิน: {app.money} บาท)"
-            font_name: 'font.ttf'
+            font_name: 'assets/fonts/font.ttf'
             font_size: '30sp'
             size_hint_y: None
             height: 50
@@ -306,24 +289,24 @@ WindowManager:
             
             Button:
                 text: "ซื้อเมล็ดกล้วยไม้ (50)"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 on_release: root.buy_seed("กล้วยไม้", 50)
             Button:
                 text: "ซื้อเมล็ดมะลิ (30)"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 on_release: root.buy_seed("มะลิ", 30)
             Button:
                 text: "ซื้อเมล็ดกระบองเพชร (40)"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 on_release: root.buy_seed("กระบองเพชร", 40)
             Button:
                 text: "ซื้อปุ๋ยพิเศษ (20)"
-                font_name: 'font.ttf'
+                font_name: 'assets/fonts/font.ttf'
                 on_release: root.buy_item("ปุ๋ยพิเศษ", 20)
 
         Button:
             text: "กลับเมนูหลัก"
-            font_name: 'font.ttf'
+            font_name: 'assets/fonts/font.ttf'
             size_hint_y: None
             height: 60
             on_release: app.root.current = "menu"
