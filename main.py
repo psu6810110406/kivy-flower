@@ -18,23 +18,7 @@ class MenuScreen(Screen):
 class LevelScreen(Screen):
     pass
 
-class ShopScreen(Screen):
-    def buy_seed(self, seed_name, price):
-        app = App.get_running_app()
-        if app.money >= price:
-            app.money -= price
-            print(f"ซื้อ {seed_name} สำเร็จ!")
-            app.unlocked_flowers.add(seed_name) # ซื้อแล้วได้ปลดล็อคใน Collection ทันที
-        else:
-            print("เงินไม่พอ!")
 
-    def buy_item(self, item_name, price):
-        app = App.get_running_app()
-        if app.money >= price:
-            app.money -= price
-            print(f"ซื้อ {item_name} สำเร็จ!")
-        else:
-            print("เงินไม่พอ!")
 
 class CollectionScreen(Screen):
     def on_pre_enter(self, *args):
@@ -66,21 +50,27 @@ class GameScreen(Screen):
 
     def reset_game(self):
         self.growth_progress = 0
-        self.flower_image_source = f"assets/images/{self.current_flower}_0.png"
+        self.flower_image_source = self.get_flower_image(0)
         self.ids.result_lbl.text = "เริ่มปลูกต้นไม้กันเลย!"
         # จัดตำแหน่งต้นไม้กลับตรงกลางเมื่อเริ่มด่านใหม่
         self.ids.flower_scatter.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
 
+    def get_flower_image(self, state):
+        path = f"assets/images/{self.current_flower}_{state}.png"
+        if os.path.exists(path):
+            return path
+        return f"assets/images/flower_{state}.png"
+
     def on_growth_change(self, instance, value):
         # เปลี่ยนรูปภาพอัตโนมัติตามความเติบโต
         if value >= 100:
-            self.flower_image_source = f"assets/images/{self.current_flower}_3.png"
+            self.flower_image_source = self.get_flower_image(3)
         elif value >= 60:
-            self.flower_image_source = f"assets/images/{self.current_flower}_2.png"
+            self.flower_image_source = self.get_flower_image(2)
         elif value >= 30:
-            self.flower_image_source = f"assets/images/{self.current_flower}_1.png"
+            self.flower_image_source = self.get_flower_image(1)
         else:
-            self.flower_image_source = f"assets/images/{self.current_flower}_0.png"
+            self.flower_image_source = self.get_flower_image(0)
 
     # Action Callbacks ตอบสนองต่อปุ่ม
     def water_plant(self):

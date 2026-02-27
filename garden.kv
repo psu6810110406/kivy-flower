@@ -5,114 +5,172 @@ WindowManager:
     LevelScreen:
     GameScreen:
     CollectionScreen:
-    ShopScreen:
 
 # ----------------- หน้า 1: เมนูหลัก -----------------
 <MenuScreen>:
     name: "menu"
     FloatLayout:
-        # พื้นหลัง
+        # 1. พื้นหลังบรรยากาศในอพาร์ตเมนต์
         Image:
-            source: "assets/images/ui_bg.png" # สมมติว่ามีรูปพื้นหลัง
-            allow_stretch: True
-            keep_ratio: False
-            size_hint: 1, 1
-            pos_hint: {'x': 0, 'y': 0}
+            source: "flower.jpg" 
+            fit_mode: "cover"
+
+        # 2. เลเยอร์สีจางๆ เพื่อให้ตัวหนังสืออ่านง่ายขึ้น
+        Widget:
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 0.2  # สีขาวโปร่งแสง 20%
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 
         BoxLayout:
             orientation: "vertical"
-            padding: 50
-            spacing: 20
-            size_hint: 0.8, 0.8
+            padding: [50, 100, 50, 50]
+            spacing: 15
+            size_hint: 0.7, 0.9
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
             Label:
-                text: "เกมปลูกดอกไม้"
+                text: "🌿 Apartment Garden 🌿"
                 font_name: 'assets/fonts/font.ttf'
-                font_size: '40sp'
-                color: 1, 1, 1, 1
-                outline_width: 2
-                outline_color: 0, 0, 0, 1
-            
+                font_size: '42sp'
+                color: 0.1, 0.3, 0.1, 1  # สีเขียวเข้ม
+
+            # เว้นระยะห่างระหว่างชื่อเกมกับปุ่ม
+            Widget:
+                size_hint_y: None
+                height: 40
+
+            # ปุ่มสไตล์ Modern
             Button:
-                text: "เริ่มเกม (เลือกด่าน)"
+                text: "Start Planting"
                 font_name: 'assets/fonts/font.ttf'
                 font_size: '24sp'
                 size_hint_y: None
                 height: 80
+                background_normal: '' 
+                background_color: 0.2, 0.5, 0.2, 0.9 # สีเขียวใบไม้
                 on_release: app.root.current = "levels" # เปลี่ยนไปหน้าด่าน
                 
             Button:
-                text: "สมุดสะสมดอกไม้"
+                text: "Collection"
                 font_name: 'assets/fonts/font.ttf'
                 font_size: '24sp'
                 size_hint_y: None
                 height: 80
+                background_normal: '' 
+                background_color: 0.2, 0.5, 0.2, 0.9 # สีเขียวใบไม้
                 on_release: app.root.current = "collection" # เปลี่ยนไปหน้าสะสม
-
-            Button:
-                text: "ร้านค้า (Shop)"
-                font_name: 'assets/fonts/font.ttf'
-                font_size: '24sp'
-                size_hint_y: None
-                height: 80
-                on_release: app.root.current = "shop" # เปลี่ยนไปหน้าร้านค้า
                 
             Button:
-                text: "วิธีการเล่น / ตั้งค่า"
+                text: "How to Play"
                 font_name: 'assets/fonts/font.ttf'
                 font_size: '24sp'
                 size_hint_y: None
                 height: 80
+                background_normal: '' 
+                background_color: 0.2, 0.5, 0.2, 0.9 # สีเขียวใบไม้
                 on_release: app.show_how_to_play() # เรียกใช้ popup
 
-# ----------------- หน้า 2: เลือกด่าน -----------------
+# ----------------- หน้า 2: เลือกด่าน (เรือนกระจก) -----------------
 <LevelScreen>:
     name: "levels"
-    BoxLayout:
-        orientation: "vertical"
-        padding: 20
-        spacing: 10
+    FloatLayout:
+        # พื้นหลังเรือนกระจก / ระเบียงต้นไม้
+        Image:
+            source: "flower.jpg" 
+            fit_mode: "cover"
 
-        Label:
-            text: "เลือกดอกไม้ที่ต้องการปลูก"
-            font_name: 'assets/fonts/font.ttf'
-            font_size: '30sp'
-            size_hint_y: None
-            height: 50
+        # เลเยอร์สีจางๆ เพื่อให้อ่านตัวหนังสือและเห็นปุ่มชัดขึ้น
+        Widget:
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 0.4  # สีขาวโปร่งแสง 40%
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 
-        # ใช้ GridLayout เพื่อเรียงปุ่ม
-        GridLayout:
-            cols: 2
-            spacing: 10
-            
-            Button:
-                text: "กุหลาบ"
-                font_name: 'assets/fonts/font.ttf'
-                on_release: app.start_game("rose")
-            Button:
-                text: "ทิวลิป"
-                font_name: 'assets/fonts/font.ttf'
-                on_release: app.start_game("tulip")
-            Button:
-                text: "เดซี่"
-                font_name: 'assets/fonts/font.ttf'
-                on_release: app.start_game("daisy")
-            Button:
-                text: "ทานตะวัน"
-                font_name: 'assets/fonts/font.ttf'
-                on_release: app.start_game("sunflower")
-            Button:
-                text: "ชบา"
-                font_name: 'assets/fonts/font.ttf'
-                on_release: app.start_game("hibiscus")
+        BoxLayout:
+            orientation: "vertical"
+            padding: [40, 60, 40, 40]
+            spacing: 20
+            size_hint: 0.85, 0.95
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
-        Button:
-            text: "กลับเมนูหลัก"
-            font_name: 'assets/fonts/font.ttf'
-            size_hint_y: None
-            height: 60
-            on_release: app.root.current = "menu"
+            Label:
+                text: "🏡 เรือนกระจก (Greenhouse) 🏡"
+                font_name: 'assets/fonts/font.ttf'
+                font_size: '36sp'
+                color: 0.1, 0.4, 0.1, 1  # สีเขียวเข้ม
+                outline_width: 1
+                size_hint_y: None
+                height: 60
+
+            Label:
+                text: "เลือกกระถางและเมล็ดพันธุ์ที่คุณต้องการปลูกวันนี้"
+                font_name: 'assets/fonts/font.ttf'
+                font_size: '20sp'
+                color: 0.2, 0.3, 0.2, 1
+                size_hint_y: None
+                height: 40
+
+            # ใช้ GridLayout เพื่อเรียงปุ่ม
+            GridLayout:
+                cols: 2
+                spacing: 15
+                
+                Button:
+                    text: "🌹 กุหลาบ"
+                    font_name: 'assets/fonts/font.ttf'
+                    font_size: '24sp'
+                    background_normal: '' 
+                    background_color: 0.8, 0.3, 0.4, 0.9 # โทนสีแดงอมชมพู
+                    on_release: app.start_game("rose")
+                Button:
+                    text: "🌷 ทิวลิป"
+                    font_name: 'assets/fonts/font.ttf'
+                    font_size: '24sp'
+                    background_normal: '' 
+                    background_color: 0.8, 0.5, 0.7, 0.9 # โทนสีชมพูม่วง
+                    on_release: app.start_game("tulip")
+                Button:
+                    text: "🌼 เดซี่"
+                    font_name: 'assets/fonts/font.ttf'
+                    font_size: '24sp'
+                    background_normal: '' 
+                    background_color: 0.9, 0.7, 0.2, 0.9 # โทนสีเหลือง
+                    on_release: app.start_game("daisy")
+                Button:
+                    text: "🌻 ทานตะวัน"
+                    font_name: 'assets/fonts/font.ttf'
+                    font_size: '24sp'
+                    background_normal: '' 
+                    background_color: 0.9, 0.6, 0.1, 0.9 # โทนสีส้มเหลือง
+                    on_release: app.start_game("sunflower")
+                Button:
+                    text: "🌺 ชบา"
+                    font_name: 'assets/fonts/font.ttf'
+                    font_size: '24sp'
+                    background_normal: '' 
+                    background_color: 0.9, 0.2, 0.3, 0.9 # โทนสีแดงสด
+                    on_release: app.start_game("hibiscus")
+
+            Widget:
+                size_hint_y: None
+                height: 20
+
+            Button:
+                text: "กลับเมนูหลัก"
+                font_name: 'assets/fonts/font.ttf'
+                font_size: '24sp'
+                size_hint_y: None
+                height: 70
+                size_hint_x: 0.6
+                pos_hint: {'center_x': 0.5}
+                background_normal: '' 
+                background_color: 0.5, 0.6, 0.5, 0.9 # สีเทาอมเขียว
+                on_release: app.root.current = "menu"
 
 # ----------------- หน้า 3: เล่นเกม (แบบใหม่) -----------------
 <GameScreen>:
@@ -260,49 +318,6 @@ WindowManager:
             text: "ยังไม่มีดอกไม้เลย ไปปลูกกันเถอะ!"
             font_name: 'assets/fonts/font.ttf'
             font_size: '20sp'
-
-        Button:
-            text: "กลับเมนูหลัก"
-            font_name: 'assets/fonts/font.ttf'
-            size_hint_y: None
-            height: 60
-            on_release: app.root.current = "menu"
-
-# ----------------- หน้า 5: ร้านค้า -----------------
-<ShopScreen>:
-    name: "shop"
-    BoxLayout:
-        orientation: "vertical"
-        padding: 20
-        spacing: 10
-
-        Label:
-            text: f"ร้านค้าเมล็ดพันธุ์ (เงิน: {app.money} บาท)"
-            font_name: 'assets/fonts/font.ttf'
-            font_size: '30sp'
-            size_hint_y: None
-            height: 50
-
-        GridLayout:
-            cols: 2
-            spacing: 10
-            
-            Button:
-                text: "ซื้อเมล็ดกล้วยไม้ (50)"
-                font_name: 'assets/fonts/font.ttf'
-                on_release: root.buy_seed("กล้วยไม้", 50)
-            Button:
-                text: "ซื้อเมล็ดมะลิ (30)"
-                font_name: 'assets/fonts/font.ttf'
-                on_release: root.buy_seed("มะลิ", 30)
-            Button:
-                text: "ซื้อเมล็ดกระบองเพชร (40)"
-                font_name: 'assets/fonts/font.ttf'
-                on_release: root.buy_seed("กระบองเพชร", 40)
-            Button:
-                text: "ซื้อปุ๋ยพิเศษ (20)"
-                font_name: 'assets/fonts/font.ttf'
-                on_release: root.buy_item("ปุ๋ยพิเศษ", 20)
 
         Button:
             text: "กลับเมนูหลัก"
