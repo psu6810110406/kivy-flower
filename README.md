@@ -16,34 +16,36 @@ Dream Garden เป็นแอปพลิเคชันเกมส์ปล�
    python main.py
    ```
 
-## 👩‍💻 คำอธิบายการทำงานใน Code (Code Explanation)
+## 👩‍💻 คำอธิบายการทำงานใน Code (Code Explanation - Update 3-5)
 โค้ดในโปรเจกต์นี้ถูกออกแบบมาเพื่อครอบคลุมข้อกำหนดเงื่อนไขของ Assignment ครบทุกเกณฑ์ โดยแบ่งออกเป็นสองส่วนหลัก:
 
-### 1. KV Language (UI Design & Layouts)
-มีการใช้ **Widget รวมกันมากกว่า 30 Widgets** ในการสร้างหน้าจอต่างๆ และโครงสร้าง UI 
-(มีคอมเมนต์นับจำนวน Widget ชัดเจนในไฟล์ `main.py`):
-- `MenuScreen`: เมนูหลัก มีปุ่มเลือกว่าจะเริ่มเกมหรือดู Catalog (ใช้ 5+ Widgets)
-- `LevelSelectScreen`: ระบบเลือกพืชพันธุ์ที่ต้องการจะดูแล โดยมีโครงข่ายของ `GridLayout` (ใช้ 10+ Widgets)
-- `GameScreen`: พื้นที่ปลูกต้นไม้ ซึ่งจะแสดงแถบ ProgressBar หลอดความก้าวหน้าในการเติบโต และปุ่ม Action สำหรับรดน้ำตากแดด (ใช้ 17+ Widgets)
-- `CatalogScreen`: แสดงผลดอกไม้ที่เก็บสะสมเมื่อเล่นเกมชนะ ใช้ `ScrollView` ห่อหุ้ม `GridLayout` เพื่อให้สามารถดูยาวๆ ได้ถ้ามีต้นไม้เพิ่ม (ใช้ 5+ Widgets)
+### 1. KV Language (UI Design & Layouts) - รวมมีมากกว่า 48 Widgets
+มีการใช้ Widget ในการสร้างหน้าจอต่างๆ และโครงสร้าง UI แยกไว้ในไฟล์ `garden.kv`:
+- `MenuScreen`: เมนูหลัก มีปุ่มเลือกว่าจะเริ่มเกม ดูร้านค้า (Shop) หรือดูวิธีเล่นพร้อม Image เบื้องหลัง (9 Widgets)
+- `LevelScreen`: ระบบเลือกพืชพันธุ์ที่ต้องการจะดูแล โดยมีโครงข่ายของ `GridLayout` (10 Widgets)
+- `GameScreen`: แสดงแถบ ProgressBar หลอดความก้าวหน้าการเติบโต Label สำหรับแสดง Money และ Stamina, `Scatter` widget สำหรับควบคุมภาพต้นไม้, และปุ่ม Action สำหรับรดน้ำตากแดดที่รวมใน `GridLayout` (15 Widgets)
+- `ShopScreen`: หน้าร้านค้าสำหรับผู้เล่นซื้อเมล็ดพันธุ์โดยใช้เงินที่มี (8 Widgets)
+- `CollectionScreen`: แสดงผลดอกไม้ที่เก็บสะสมเมื่อเล่นเกมชนะ (5 Widgets)
 
-### 2. Python Logic (Callbacks & Application State)
-มีการใช้งาน **Callbacks ไม่ต่ำกว่า 10 ตัว** อย่างชัดเจน เช่น:
-- Callback ควบคุมการเปลี่ยนหน้า UI (`app.root.current = ...`) อย่างน้อย 5 ตัวรอบรับการกดปุ่มเปลี่ยนหน้าไปมา
-- Callback เรียกดู Popup ข้อมูลพืชพันธุ์ (`root.show_level_info`)
-- Callback ประมวลผลลัพธ์ Action เกม (`root.take_action`) 
-- Callback เชื่อมประทับเพื่อปิด Popup และตั้งค่าเกม (`start_game`, `go_next`) ทันทีที่คลิก 
-- Callback เพื่ออัปเดตข้อมูลบนจอภาพแบบเรียลไทม์ เช่น `on_pre_enter` ในช่วงเวลาเปิด Collection ขึ้นมา
+### 2. Python Logic (Callbacks & Application State) - รวมมีมากกว่า 20 Callbacks
+มีการใช้ Property Binding และ Action Callbacks ในตัวของ `main.py` เช่น:
+- **Property Binding**: นำ `growth_progress` มาใช้กับฟังก์ชัน `on_growth_change` 
+  เพื่อให้เมื่อกดรดน้ำหลอดโตขึ้น รูปภาพดอกไม้ก็จะเปลี่ยนสเตจการเติบโตอัตโนมัติ 
+- **Action Callbacks**:
+  - Callback ฟังก์ชันรดน้ำ (`water_plant`), ใส่ปุ๋ย (`fertilize_plant`), พรวนดิน (`till_soil`)
+  - Callback เรียกดู Popup วิธีเล่น (`show_how_to_play` > `popup.dismiss`)
+  - Callback สำหรับหน้าร้านค้า (`buy_seed`, `buy_item`) 
+  - Callback ควบคุมการสลับหน้า (Screen Transition) มากกว่า 5 แห่ง (e.g. `app.root.current`)
 
 ### 3. ระบบเกม (Game Logic)
-- **State Management:** แต่ละต้นไม้ในตัวแปร `GAME_DATA` จะเก็บข้อมูล "Preferences" ความชอบ เช่น ต้องการน้ำเยอะ แสงน้อย ฯลฯ หากผู้เล่นเลือก Action ที่ตรงกับความชอบ หลอดการเติบโตจะเพิ่มเปอร์เซ็นต์สูงขึ้น
-- **Image Fallback Simulation:** โปรแกรมรองรับการแสดงผลทั้ง "ภาพกราฟิกจากไฟล์ (.png/.jpg)" และ "อิโมจิ (Emoji)" แบบ Fallback หากโฟลเดอร์ `assets/` ของคุณยังไม่มีรูปภาพ ดอกไม้ก็จะแสดงเป็นอิโมจิให้เติบโตให้ตามเปอร์เซนต์การเติบโตแทน
+- **State Management:** แต่ละต้นไม้ใช้ค่า Stamina ที่ต่างกัน แต่ละปุ่มจะดูดค่าพลังงาน (Stamina) และเพิ่มความก้าวหน้า (Growth Progress) ไม่เท่ากัน 
+- เงิน (Money) จะได้รับกลับมาเมื่อปลูกเสร็จ ทำให้สามารถนำไปต่อยอดซื้อใน `ShopScreen` ได้
 
 ---
 ## ✨ คุณสมบัติตามข้อกำหนด Assignment
 1. **Application:** เป็นอิสระและมีความไม่ซ้ำกันตามหัวข้อ **"เกมส์ปลูกดอกไม้ (Dream Garden)"**
 2. **Kivy Framework:** ใช้ Kivy สมบูรณ์แบบ (ทั้งระดับกราฟิกและ KV lang)
-3. **Widgets Requirement:** จำนวนรวม > 30 Widgets 
-4. **Callbacks Requirement:** จำนวนรวม > 10 Callbacks 
+3. **Widgets Requirement:** จำนวนรวม > 30 Widgets (ปัจจุบันใช้ 40+ ตัว)
+4. **Callbacks Requirement:** จำนวนรวม > 10 Callbacks (ปัจจุบันทำไปมากกว่า 20 Callbacks)
 5. **Version Control:** มี Repository ของ Git ติดมาพ่วงด้วย 50 Commits ครอบคลุมระยะเวลา 14 วัน (ใช้หลัก Commit Early, Commit Often)
 6. **Documentation:** อธิบายตาม README.md นี้ครบถ้วนและสมบูรณ์

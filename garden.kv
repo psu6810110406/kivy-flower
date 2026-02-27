@@ -1,0 +1,294 @@
+# garden.kv
+# ประกาศตัวจัดการหน้าจอ
+WindowManager:
+    MenuScreen:
+    LevelScreen:
+    GameScreen:
+    CollectionScreen:
+    ShopScreen:
+
+# ----------------- หน้า 1: เมนูหลัก -----------------
+<MenuScreen>:
+    name: "menu"
+    FloatLayout:
+        # พื้นหลัง
+        Image:
+            source: "assets/flower_bg.png" # สมมติว่ามีรูปพื้นหลัง
+            allow_stretch: True
+            keep_ratio: False
+            size_hint: 1, 1
+            pos_hint: {'x': 0, 'y': 0}
+
+        BoxLayout:
+            orientation: "vertical"
+            padding: 50
+            spacing: 20
+            size_hint: 0.8, 0.8
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+            Label:
+                text: "เกมปลูกดอกไม้"
+                font_name: 'font.ttf'
+                font_size: '40sp'
+                color: 1, 1, 1, 1
+                outline_width: 2
+                outline_color: 0, 0, 0, 1
+            
+            Button:
+                text: "เริ่มเกม (เลือกด่าน)"
+                font_name: 'font.ttf'
+                font_size: '24sp'
+                size_hint_y: None
+                height: 80
+                on_release: app.root.current = "levels" # เปลี่ยนไปหน้าด่าน
+                
+            Button:
+                text: "สมุดสะสมดอกไม้"
+                font_name: 'font.ttf'
+                font_size: '24sp'
+                size_hint_y: None
+                height: 80
+                on_release: app.root.current = "collection" # เปลี่ยนไปหน้าสะสม
+
+            Button:
+                text: "ร้านค้า (Shop)"
+                font_name: 'font.ttf'
+                font_size: '24sp'
+                size_hint_y: None
+                height: 80
+                on_release: app.root.current = "shop" # เปลี่ยนไปหน้าร้านค้า
+                
+            Button:
+                text: "วิธีการเล่น / ตั้งค่า"
+                font_name: 'font.ttf'
+                font_size: '24sp'
+                size_hint_y: None
+                height: 80
+                on_release: app.show_how_to_play() # เรียกใช้ popup
+
+# ----------------- หน้า 2: เลือกด่าน -----------------
+<LevelScreen>:
+    name: "levels"
+    BoxLayout:
+        orientation: "vertical"
+        padding: 20
+        spacing: 10
+
+        Label:
+            text: "เลือกดอกไม้ที่ต้องการปลูก"
+            font_name: 'font.ttf'
+            font_size: '30sp'
+            size_hint_y: None
+            height: 50
+
+        # ใช้ GridLayout เพื่อเรียงปุ่ม
+        GridLayout:
+            cols: 2
+            spacing: 10
+            
+            Button:
+                text: "กุหลาบ"
+                font_name: 'font.ttf'
+                on_release: app.start_game("rose")
+            Button:
+                text: "ทิวลิป"
+                font_name: 'font.ttf'
+                on_release: app.start_game("tulip")
+            Button:
+                text: "เดซี่"
+                font_name: 'font.ttf'
+                on_release: app.start_game("daisy")
+            Button:
+                text: "ทานตะวัน"
+                font_name: 'font.ttf'
+                on_release: app.start_game("sunflower")
+            Button:
+                text: "ชบา"
+                font_name: 'font.ttf'
+                on_release: app.start_game("hibiscus")
+
+        Button:
+            text: "กลับเมนูหลัก"
+            font_name: 'font.ttf'
+            size_hint_y: None
+            height: 60
+            on_release: app.root.current = "menu"
+
+# ----------------- หน้า 3: เล่นเกม (แบบใหม่) -----------------
+<GameScreen>:
+    name: "game"
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 15
+
+        # ส่วนหัวแสดงสถานะต่างๆ
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: 50
+            spacing: 10
+
+            Label:
+                text: f"เงิน: {app.money} บาท"
+                font_name: 'font.ttf'
+                font_size: '20sp'
+            Label:
+                text: f"พลังงาน (Stamina): {app.stamina}"
+                font_name: 'font.ttf'
+                font_size: '20sp'
+
+        Label:
+            id: title_lbl
+            text: "กำลังปลูก..."
+            font_name: 'font.ttf'
+            font_size: '24sp'
+            size_hint_y: None
+            height: 50
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+        # แสดงหลอดความก้าวหน้า ProgressBar
+        ProgressBar:
+            id: growth_bar
+            max: 100
+            value: root.growth_progress
+            size_hint_y: None
+            height: 30
+
+        # ส่วนแสดงต้นไม้ที่สามารถขยับ/ซูมได้ผ่าน Scatter
+        FloatLayout:
+            Scatter:
+                id: flower_scatter
+                size_hint: None, None
+                size: 250, 250
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                do_rotation: False
+                
+                Image:
+                    id: flower_img
+                    source: root.flower_image_source
+                    size: flower_scatter.size
+
+        # ส่วนควบคุมปุ่มกด GridLayout
+        GridLayout:
+            cols: 3
+            spacing: 10
+            size_hint_y: None
+            height: 60
+            
+            Button:
+                text: "รดน้ำ"
+                font_name: 'font.ttf'
+                background_color: 0.2, 0.4, 0.8, 1
+                on_release: root.water_plant()
+            Button:
+                text: "ใส่ปุ๋ย"
+                font_name: 'font.ttf'
+                background_color: 0.8, 0.6, 0.2, 1
+                on_release: root.fertilize_plant()
+            Button:
+                text: "พรวนดิน"
+                font_name: 'font.ttf'
+                background_color: 0.5, 0.3, 0.1, 1
+                on_release: root.till_soil()
+
+        Label:
+            id: result_lbl
+            text: "รอดูผลการดูแล..."
+            font_name: 'font.ttf'
+            font_size: '20sp'
+            size_hint_y: None
+            height: 60
+            text_size: self.width, None
+            halign: 'center'
+            valign: 'middle'
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+        Button:
+            text: "ยอมแพ้ / กลับหน้าเลือกด่าน"
+            font_name: 'font.ttf'
+            size_hint_y: None
+            height: 50
+            background_color: 0.8, 0.2, 0.2, 1
+            on_release: root.give_up()
+
+# ----------------- หน้า 4: สะสมดอกไม้ -----------------
+<CollectionScreen>:
+    name: "collection"
+    BoxLayout:
+        orientation: "vertical"
+        padding: 20
+        spacing: 10
+
+        Label:
+            text: "ดอกไม้ที่คุณปลูกสำเร็จ"
+            font_name: 'font.ttf'
+            font_size: '30sp'
+            size_hint_y: None
+            height: 50
+
+        Label:
+            id: collection_lbl
+            text: "ยังไม่มีดอกไม้เลย ไปปลูกกันเถอะ!"
+            font_name: 'font.ttf'
+            font_size: '20sp'
+
+        Button:
+            text: "กลับเมนูหลัก"
+            font_name: 'font.ttf'
+            size_hint_y: None
+            height: 60
+            on_release: app.root.current = "menu"
+
+# ----------------- หน้า 5: ร้านค้า -----------------
+<ShopScreen>:
+    name: "shop"
+    BoxLayout:
+        orientation: "vertical"
+        padding: 20
+        spacing: 10
+
+        Label:
+            text: f"ร้านค้าเมล็ดพันธุ์ (เงิน: {app.money} บาท)"
+            font_name: 'font.ttf'
+            font_size: '30sp'
+            size_hint_y: None
+            height: 50
+
+        GridLayout:
+            cols: 2
+            spacing: 10
+            
+            Button:
+                text: "ซื้อเมล็ดกล้วยไม้ (50)"
+                font_name: 'font.ttf'
+                on_release: root.buy_seed("กล้วยไม้", 50)
+            Button:
+                text: "ซื้อเมล็ดมะลิ (30)"
+                font_name: 'font.ttf'
+                on_release: root.buy_seed("มะลิ", 30)
+            Button:
+                text: "ซื้อเมล็ดกระบองเพชร (40)"
+                font_name: 'font.ttf'
+                on_release: root.buy_seed("กระบองเพชร", 40)
+            Button:
+                text: "ซื้อปุ๋ยพิเศษ (20)"
+                font_name: 'font.ttf'
+                on_release: root.buy_item("ปุ๋ยพิเศษ", 20)
+
+        Button:
+            text: "กลับเมนูหลัก"
+            font_name: 'font.ttf'
+            size_hint_y: None
+            height: 60
+            on_release: app.root.current = "menu"
