@@ -16,7 +16,7 @@ Dream Garden เป็นแอปพลิเคชันเกมส์ปล�
    python main.py
    ```
 
-## 👩‍💻 คำอธิบายการทำงานใน Code (Code Explanation - Update 3-5)
+## 👩‍💻 คำอธิบายการทำงานใน Code (Code Explanation)
 โค้ดในโปรเจกต์นี้ถูกออกแบบมาเพื่อครอบคลุมข้อกำหนดเงื่อนไขของ Assignment ครบทุกเกณฑ์ โดยแบ่งออกเป็นสองส่วนหลัก:
 
 ### 1. KV Language (UI Design & Layouts) - รวมมีมากกว่า 48 Widgets
