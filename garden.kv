@@ -267,47 +267,74 @@ WindowManager:
                             size: self.size
                             radius: [10,]
 
-            # ปุ่มกดแบบ Minimal
-            GridLayout:
-                cols: 3
+            # ปรับเปลี่ยนปุ่มเมื่อโตเต็มที่
+            FloatLayout:
                 size_hint_y: 0.2
-                spacing: 15
-                
+
+                # ปุ่มกดแบบ Minimal ปกติ
+                GridLayout:
+                    cols: 3
+                    size_hint: 1, 1
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5} if root.growth_progress < 100 else {'top': 2.0}
+                    spacing: 15
+                    opacity: 1 if root.growth_progress < 100 else 0
+                    disabled: root.growth_progress >= 100
+                    
+                    Button:
+                        text: "รดน้ำ"
+                        font_name: 'assets/fonts/font.ttf'
+                        font_size: '20sp'
+                        background_normal: '' 
+                        background_color: 0.2, 0.5, 0.8, 0.8
+                        on_release: root.water_plant()
+                    Button:
+                        text: "ใส่ปุ๋ย"
+                        font_name: 'assets/fonts/font.ttf'
+                        font_size: '20sp'
+                        background_normal: '' 
+                        background_color: 0.8, 0.6, 0.2, 0.8
+                        on_release: root.fertilize_plant()
+                    Button:
+                        text: "พรวนดิน"
+                        font_name: 'assets/fonts/font.ttf'
+                        font_size: '20sp'
+                        background_normal: '' 
+                        background_color: 0.6, 0.4, 0.2, 0.8
+                        on_release: root.till_soil()
+                    Button:
+                        text: "พักผ่อน"
+                        font_name: 'assets/fonts/font.ttf'
+                        font_size: '20sp'
+                        background_normal: '' 
+                        background_color: 0.2, 0.7, 0.5, 0.8
+                        on_release: app.next_day()
+                    Button:
+                        text: "ออกชั่วคราว"
+                        font_name: 'assets/fonts/font.ttf'
+                        font_size: '20sp'
+                        background_normal: '' 
+                        background_color: 0.5, 0.5, 0.5, 0.8
+                        on_release: app.root.current = "levels"
+                    Button:
+                        text: "ยอมแพ้"
+                        font_name: 'assets/fonts/font.ttf'
+                        font_size: '20sp'
+                        background_normal: '' 
+                        background_color: 0.8, 0.3, 0.3, 0.8
+                        on_release: root.give_up()
+
+                # ปุ่มเก็บเกี่ยว (แสดงเมื่อ 100%)
                 Button:
-                    text: "รดน้ำ"
+                    text: "ย้ายกระถางดอกไม้!"
                     font_name: 'assets/fonts/font.ttf'
-                    font_size: '20sp'
+                    font_size: '24sp'
+                    size_hint: 0.8, 0.8
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5} if root.growth_progress >= 100 else {'top': 2.0}
                     background_normal: '' 
-                    background_color: 0.2, 0.5, 0.8, 0.8
-                    on_release: root.water_plant()
-                Button:
-                    text: "ใส่ปุ๋ย"
-                    font_name: 'assets/fonts/font.ttf'
-                    font_size: '20sp'
-                    background_normal: '' 
-                    background_color: 0.8, 0.6, 0.2, 0.8
-                    on_release: root.fertilize_plant()
-                Button:
-                    text: "พรวนดิน"
-                    font_name: 'assets/fonts/font.ttf'
-                    font_size: '20sp'
-                    background_normal: '' 
-                    background_color: 0.6, 0.4, 0.2, 0.8
-                    on_release: root.till_soil()
-                Button:
-                    text: "พักผ่อน"
-                    font_name: 'assets/fonts/font.ttf'
-                    font_size: '20sp'
-                    background_normal: '' 
-                    background_color: 0.2, 0.7, 0.5, 0.8
-                    on_release: app.next_day()
-                Button:
-                    text: "ยอมแพ้"
-                    font_name: 'assets/fonts/font.ttf'
-                    font_size: '20sp'
-                    background_normal: '' 
-                    background_color: 0.8, 0.3, 0.3, 0.8
-                    on_release: root.give_up()
+                    background_color: 0.8, 0.6, 0.2, 0.9 # สีทอง
+                    opacity: 1 if root.growth_progress >= 100 else 0
+                    disabled: root.growth_progress < 100
+                    on_release: root.collect_flower()
 
 # ----------------- หน้า 4: สะสมดอกไม้ -----------------
 <CollectionScreen>:

@@ -174,10 +174,19 @@ class GameScreen(Screen):
     def check_win(self):
         if self.growth_progress >= 100:
             self.growth_progress = 100 # กันเกิน
-            self.update_status("ยินดีด้วย! ดอกไม้บานเต็มที่แล้ว!")
+            self.update_status("ยินดีด้วย! ดอกไม้บานเต็มที่แล้ว เก็บเกี่ยวได้เลย!")
             app = App.get_running_app()
-            app.unlocked_flowers.add(self.current_flower)
             app.money += 50
+            # ดอกไม้บานแล้ว จะมีปุ่มเก็บเกี่ยวโผล่ขึ้นมาตาม logic ใน garden.kv
+
+    def collect_flower(self):
+        if self.growth_progress >= 100:
+            app = App.get_running_app()
+            # เพิ่มดอกไม้ลงใน Collection
+            app.unlocked_flowers.append(self.current_flower)
+            self.update_status("เก็บเข้า Collection แล้ว!")
+            # กลับไปหน้าหลัก
+            app.root.current = "menu"
             app.stamina += 30 # ได้โบนัสพลังงานคืน
             print("You won!")
 
@@ -205,7 +214,7 @@ class FlowerApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.current_playing_flower = "rose" 
-        self.unlocked_flowers = set()
+        self.unlocked_flowers = []
 
     def build(self):
         # โหลดไฟล์ garden.kv ตามข้อกำหนด
@@ -224,17 +233,65 @@ class FlowerApp(App):
         self.root.current = "game"
         
     def show_how_to_play(self):
-        # Popup สำหรับโชว์วิธีการเล่น
-        box = BoxLayout(orientation='vertical', padding=10, spacing=10)
-        box.add_widget(Label(
-            text="วิธีเล่น:\n1. ใช้พลังงานเพื่อรดน้ำ ใส่ปุ๋ย หรือพรวนดิน\n2. หลอดการเติบโต ProgressBar ครบ 100% จะได้ดอกไม้\n3. เงินใช้อัปเกรดหรือซื้อเมล็ดเพิ่มเติม\n4. สามารถซูม/ย้ายต้นไม้ด้้วย Scatter Widget",
-            font_name='assets/fonts/font.ttf', 
-            font_size='18sp'
-        ))
-        close_btn = Button(text="ปิดหน้าต่าง", font_name='assets/fonts/font.ttf', size_hint_y=None, height=50)
-        box.add_widget(close_btn)
+        from kivy.uix.floatlayout import FloatLayout
+        from kivy.graphics import Color, RoundedRectangle
         
-        popup = Popup(title="วิธีการเล่น (Settings)", content=box, size_hint=(0.8, 0.6), title_font='assets/fonts/font.ttf')
+        # 2. เนื้อหาข้างใน
+        content_box = BoxLayout(orientation='vertical', padding=20, spacing=15)
+        
+        # หัวข้อที่ดูน่ารัก
+        header = Label(
+            text="🌿 วิธีดูแลสวนในอพาร์ตเมนต์ 🌿",
+            font_name='assets/fonts/font.ttf',
+            font_size='28sp',
+            color=(0.2, 0.5, 0.2, 1), # สีเขียวธรรมชาติ
+            bold=True,
+            size_hint_y=0.2
+        )
+        
+        # รายละเอียด (จัดให้อ่านง่ายขึ้น)
+        instructions = Label(
+            text=(
+                "• [b]Stamina:[/b] ใช้พลังงานรดน้ำ/ใส่ปุ๋ย\n"
+                "• [b]Growth:[/b] ครบ 100% ดอกไม้จะบานสะพรั่ง\n"
+                "• [b]Shop:[/b] ใช้เงินซื้อเมล็ดพันธุ์ใหม่ๆ\n"
+                "• [b]Tip:[/b] ใช้ 2 นิ้วซูมหรือลากต้นไม้ได้อิสระ!"
+            ),
+            font_name='assets/fonts/font.ttf',
+            font_size='20sp',
+            color=(0.3, 0.3, 0.3, 1), # สีเทาเข้มอ่านง่าย
+            markup=True, # เปิดใช้งาน [b] ตัวหนา
+            halign='left',
+            valign='middle'
+        )
+        instructions.bind(size=instructions.setter('text_size'))
+
+        # ปุ่มปิดที่ดูละมุน
+        close_btn = Button(
+            text="เข้าใจแล้วจ้า",
+            font_name='assets/fonts/font.ttf',
+            size_hint=(0.6, 0.2),
+            pos_hint={'center_x': 0.5},
+            background_normal='', # ลบสีเทาเดิม
+            background_color=(0.4, 0.7, 0.4, 1), # สีเขียวอ่อนน่ารัก
+            color=(1, 1, 1, 1)
+        )
+
+        content_box.add_widget(header)
+        content_box.add_widget(instructions)
+        content_box.add_widget(close_btn)
+
+        # สร้าง Popup โดยซ่อนพื้นหลังเดิม (Background) เพื่อใช้ดีไซน์ที่เราสร้างเอง
+        popup = Popup(
+            title="Apartment Garden Guide",
+            content=content_box,
+            size_hint=(0.8, 0.7),
+            title_font='assets/fonts/font.ttf',
+            title_align='center',
+            separator_color=(0.4, 0.7, 0.4, 1), # สีเส้นคั่น
+            background_color=(1, 1, 1, 0.95) # พื้นหลังขาวนวล
+        )
+        
         close_btn.bind(on_release=popup.dismiss)
         popup.open()
 
