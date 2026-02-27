@@ -16,14 +16,12 @@ WindowManager:
             fit_mode: "cover"
 
         # 2. เลเยอร์สีจางๆ เพื่อให้ตัวหนังสืออ่านง่ายขึ้น
-        Widget:
-            canvas.before:
-                Color:
-                    rgba: 0, 0, 0, 0.4  # พื้นหลังดำโปร่งแสง 40%
-                RoundedRectangle:
-                    pos: self.pos
-                    size: self.size
-                    radius: [20,]
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 0.2  # สีขาวโปร่งแสง 20%
+            Rectangle:
+                pos: self.pos
+                size: self.size
 
         BoxLayout:
             orientation: "vertical"
@@ -47,32 +45,9 @@ WindowManager:
             Button:
                 text: "Start Planting"
                 font_name: 'assets/fonts/font.ttf'
-                font_size: '24sp'
-                size_hint_y: None
-                height: 80
                 background_normal: '' 
                 background_color: 0.2, 0.5, 0.2, 0.9 # สีเขียวใบไม้
-                on_release: app.root.current = "levels" # เปลี่ยนไปหน้าด่าน
-                
-            Button:
-                text: "Collection"
-                font_name: 'assets/fonts/font.ttf'
-                font_size: '24sp'
-                size_hint_y: None
-                height: 80
-                background_normal: '' 
-                background_color: 0.2, 0.5, 0.2, 0.9 # สีเขียวใบไม้
-                on_release: app.root.current = "collection" # เปลี่ยนไปหน้าสะสม
-                
-            Button:
-                text: "How to Play"
-                font_name: 'assets/fonts/font.ttf'
-                font_size: '24sp'
-                size_hint_y: None
-                height: 80
-                background_normal: '' 
-                background_color: 0.2, 0.5, 0.2, 0.9 # สีเขียวใบไม้
-                on_release: app.show_how_to_play() # เรียกใช้ popup
+                on_release: app.root.current = "levels"
 
 # ----------------- หน้า 2: เลือกด่าน (เรือนกระจก) -----------------
 <LevelScreen>:
@@ -97,11 +72,13 @@ WindowManager:
             orientation: "vertical"
             padding: [40, 60, 40, 40]
             spacing: 20
-            size_hint: 0.85, 0.95
+            size_hint_x: None
+            width: min(self.parent.width * 0.9, 800)
+            size_hint_y: 0.95
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
             Label:
-                text: "🏡 เรือนกระจก (Greenhouse) 🏡"
+                text: "เรือนกระจก (Greenhouse)"
                 font_name: 'assets/fonts/font.ttf'
                 font_size: '36sp'
                 color: 0.1, 0.4, 0.1, 1  # สีเขียวเข้ม
@@ -123,35 +100,35 @@ WindowManager:
                 spacing: 15
                 
                 Button:
-                    text: "🌹 กุหลาบ"
+                    text: "กุหลาบ"
                     font_name: 'assets/fonts/font.ttf'
                     font_size: '24sp'
                     background_normal: '' 
                     background_color: 0.8, 0.3, 0.4, 0.9 # โทนสีแดงอมชมพู
                     on_release: app.start_game("rose")
                 Button:
-                    text: "🌷 ทิวลิป"
+                    text: "ทิวลิป"
                     font_name: 'assets/fonts/font.ttf'
                     font_size: '24sp'
                     background_normal: '' 
                     background_color: 0.8, 0.5, 0.7, 0.9 # โทนสีชมพูม่วง
                     on_release: app.start_game("tulip")
                 Button:
-                    text: "🌼 เดซี่"
+                    text: "เดซี่"
                     font_name: 'assets/fonts/font.ttf'
                     font_size: '24sp'
                     background_normal: '' 
                     background_color: 0.9, 0.7, 0.2, 0.9 # โทนสีเหลือง
                     on_release: app.start_game("daisy")
                 Button:
-                    text: "🌻 ทานตะวัน"
+                    text: "ทานตะวัน"
                     font_name: 'assets/fonts/font.ttf'
                     font_size: '24sp'
                     background_normal: '' 
                     background_color: 0.9, 0.6, 0.1, 0.9 # โทนสีส้มเหลือง
                     on_release: app.start_game("sunflower")
                 Button:
-                    text: "🌺 ชบา"
+                    text: "ชบา"
                     font_name: 'assets/fonts/font.ttf'
                     font_size: '24sp'
                     background_normal: '' 
@@ -193,15 +170,15 @@ WindowManager:
                     size: self.size
                     radius: [20,]
             Label:
-                text: f"💰 {app.money}"
+                text: f"เงิน: {app.money}"
                 font_name: 'assets/fonts/font.ttf'
                 font_size: '22sp'
             Label:
-                text: f"⚡ {app.stamina}"
+                text: f"พลังงาน: {app.stamina}"
                 font_name: 'assets/fonts/font.ttf'
                 font_size: '22sp'
             Label:
-                text: f"☁️ {app.weather}" # Widget ใหม่: สภาพอากาศ
+                text: f"อากาศ: {app.weather}" # Widget ใหม่: สภาพอากาศ
                 font_name: 'assets/fonts/font.ttf'
                 font_size: '22sp'
                 color: 1, 0.8, 0, 1
