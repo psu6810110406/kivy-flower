@@ -9,6 +9,7 @@ from kivy.properties import NumericProperty, StringProperty
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.button import Button
+from kivy.animation import Animation
 import random
 
 # 1. สร้างหน้าจอต่างๆ เตรียมไว้ก่อน
@@ -81,6 +82,11 @@ class GameScreen(Screen):
             bonus = 20 if app.weather == "แดดจัด" else 10
             self.growth_progress += bonus
             self.update_status(f"รดน้ำในวัน {app.weather} (+{bonus}%)")
+            
+            # Animation สั่นต้นไม้เมื่อรดน้ำ
+            anim = Animation(scale=1.2, duration=0.1) + Animation(scale=1.0, duration=0.1)
+            anim.start(self.ids.flower_scatter)
+            
             self.check_win()
         else:
             self.update_status("พลังงานไม่พอ! ต้องพักก่อน")

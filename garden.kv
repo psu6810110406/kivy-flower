@@ -12,17 +12,18 @@ WindowManager:
     FloatLayout:
         # 1. พื้นหลังบรรยากาศในอพาร์ตเมนต์
         Image:
-            source: "flower.jpg" 
+            source: "assets/images/garden.png" 
             fit_mode: "cover"
 
         # 2. เลเยอร์สีจางๆ เพื่อให้ตัวหนังสืออ่านง่ายขึ้น
         Widget:
             canvas.before:
                 Color:
-                    rgba: 1, 1, 1, 0.2  # สีขาวโปร่งแสง 20%
-                Rectangle:
+                    rgba: 0, 0, 0, 0.4  # พื้นหลังดำโปร่งแสง 40%
+                RoundedRectangle:
                     pos: self.pos
                     size: self.size
+                    radius: [20,]
 
         BoxLayout:
             orientation: "vertical"
@@ -79,17 +80,18 @@ WindowManager:
     FloatLayout:
         # พื้นหลังเรือนกระจก / ระเบียงต้นไม้
         Image:
-            source: "flower.jpg" 
+            source: "assets/images/garden.png" 
             fit_mode: "cover"
 
         # เลเยอร์สีจางๆ เพื่อให้อ่านตัวหนังสือและเห็นปุ่มชัดขึ้น
         Widget:
             canvas.before:
                 Color:
-                    rgba: 1, 1, 1, 0.4  # สีขาวโปร่งแสง 40%
-                Rectangle:
+                    rgba: 0, 0, 0, 0.4  # พื้นหลังดำโปร่งแสง 40%
+                RoundedRectangle:
                     pos: self.pos
                     size: self.size
+                    radius: [20,]
 
         BoxLayout:
             orientation: "vertical"
@@ -177,126 +179,148 @@ WindowManager:
     name: "game"
     BoxLayout:
         orientation: 'vertical'
-        padding: 15
-        spacing: 10
+        padding: 20
+        spacing: 15
 
-        GridLayout:
-            cols: 3
-            size_hint_y: None
-            height: 60
+        # Dashboard สไตล์กระจก (Glassmorphism)
+        BoxLayout:
+            size_hint_y: 0.15
             canvas.before:
                 Color:
-                    rgba: 0.2, 0.6, 0.2, 0.2
-                Rectangle:
+                    rgba: 1, 1, 1, 0.1
+                RoundedRectangle:
                     pos: self.pos
                     size: self.size
-            
+                    radius: [20,]
             Label:
                 text: f"💰 {app.money}"
                 font_name: 'assets/fonts/font.ttf'
+                font_size: '22sp'
             Label:
                 text: f"⚡ {app.stamina}"
                 font_name: 'assets/fonts/font.ttf'
+                font_size: '22sp'
             Label:
                 text: f"☁️ {app.weather}" # Widget ใหม่: สภาพอากาศ
                 font_name: 'assets/fonts/font.ttf'
+                font_size: '22sp'
                 color: 1, 0.8, 0, 1
 
-        Label:
-            id: title_lbl
-            text: "กำลังปลูก..."
-            font_name: 'assets/fonts/font.ttf'
-            font_size: '22sp'
-            size_hint_y: None
-            height: 40
-            canvas.before:
-                Color:
-                    rgba: 0, 0, 0, 1
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
-        
-        ProgressBar:
-            id: growth_bar
-            max: 100
-            value: root.growth_progress
-            size_hint_y: None
-            height: 20
-
-        # แสดงหลอดความก้าวหน้า ProgressBar
-        ProgressBar:
-            id: growth_bar
-            max: 100
-            value: root.growth_progress
-            size_hint_y: None
-            height: 20
-
-        # ส่วนแสดงต้นไม้ที่สามารถขยับ/ซูมได้ผ่าน Scatter
+        # พื้นที่สวนอพาร์ตเมนต์
         FloatLayout:
-            Scatter:
-                id: flower_scatter
-                size_hint: None, None
-                size: 300, 300
-                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-                do_rotation: False
-                
-                Image:
-                    id: flower_img
-                    source: root.flower_image_source
-                    size: flower_scatter.size
-
-        # ส่วนควบคุมปุ่มกด GridLayout
-        GridLayout:
-            cols: 3
-            spacing: 10
-            size_hint_y: None
-            height: 120 # ขยายความสูงเพื่อรองรับ 2 แถว
+            Image:
+                source: "assets/images/garden.png"
+                fit_mode: "cover"
             
-            Button:
-                text: "รดน้ำ"
-                font_name: 'assets/fonts/font.ttf'
-                background_color: 0.2, 0.4, 0.8, 1
-                on_release: root.water_plant()
-            Button:
-                text: "ใส่ปุ๋ย"
-                font_name: 'assets/fonts/font.ttf'
-                background_color: 0.8, 0.6, 0.2, 1
-                on_release: root.fertilize_plant()
-            Button:
-                text: "พรวนดิน"
-                font_name: 'assets/fonts/font.ttf'
-                background_color: 0.5, 0.3, 0.1, 1
-                on_release: root.till_soil()
-            Button:
-                text: "พักผ่อน (ข้ามวัน)"
-                font_name: 'assets/fonts/font.ttf'
-                background_color: 0.2, 0.8, 0.6, 1
-                on_release: app.next_day()
+            Widget:
+                canvas.before:
+                    Color:
+                        rgba: 0, 0, 0, 0.4  # สีดำโปร่งแสง
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [20,]
 
-        Label:
-            id: result_lbl
-            text: "รอดูผลการดูแล..."
-            font_name: 'assets/fonts/font.ttf'
-            font_size: '20sp'
-            size_hint_y: None
-            height: 40
-            text_size: self.width, None
-            halign: 'center'
-            valign: 'middle'
-            canvas.before:
-                Color:
-                    rgba: 0, 0, 0, 1
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
+            BoxLayout:
+                orientation: 'vertical'
+                padding: 15
+                spacing: 15
+                size_hint: 0.9, 0.95
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
-        Button:
-            text: "ยอมแพ้ / กลับหน้าเลือกด่าน"
-            font_name: 'assets/fonts/font.ttf'
-            size_hint_y: None
-            height: 40
-            background_color: 0.8, 0.2, 0.2, 1
-            on_release: root.give_up()
+                Label:
+                    id: title_lbl
+                    text: "กำลังปลูก..."
+                    font_name: 'assets/fonts/font.ttf'
+                    font_size: '22sp'
+                    size_hint_y: None
+                    height: 40
+                    canvas.before:
+                        Color:
+                            rgba: 0, 0, 0, 0.6
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [10,]
+                
+                ProgressBar:
+                    id: growth_bar
+                    max: 100
+                    value: root.growth_progress
+                    size_hint_y: None
+                    height: 20
+
+                FloatLayout:
+                    Scatter:
+                        id: flower_scatter
+                        size_hint: None, None
+                        size: 300, 300
+                        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                        do_rotation: False
+                        
+                        Image:
+                            id: flower_img
+                            source: root.flower_image_source
+                            size: flower_scatter.size
+
+                # ส่วนควบคุมปุ่มกด GridLayout
+                GridLayout:
+                    cols: 3
+                    spacing: 10
+                    size_hint_y: None
+                    height: 120
+                    
+                    Button:
+                        text: "รดน้ำ"
+                        font_name: 'assets/fonts/font.ttf'
+                        background_normal: ''
+                        background_color: 0.2, 0.4, 0.8, 0.9
+                        on_release: root.water_plant()
+                    Button:
+                        text: "ใส่ปุ๋ย"
+                        font_name: 'assets/fonts/font.ttf'
+                        background_normal: ''
+                        background_color: 0.6, 0.4, 0.2, 0.9
+                        on_release: root.fertilize_plant()
+                    Button:
+                        text: "พรวนดิน"
+                        font_name: 'assets/fonts/font.ttf'
+                        background_normal: ''
+                        background_color: 0.5, 0.3, 0.1, 0.9
+                        on_release: root.till_soil()
+                    Button:
+                        text: "พักผ่อน (ข้ามวัน)"
+                        font_name: 'assets/fonts/font.ttf'
+                        background_normal: ''
+                        background_color: 0.2, 0.6, 0.4, 0.9
+                        on_release: app.next_day()
+
+                Label:
+                    id: result_lbl
+                    text: "รอดูผลการดูแล..."
+                    font_name: 'assets/fonts/font.ttf'
+                    font_size: '20sp'
+                    size_hint_y: None
+                    height: 40
+                    text_size: self.width, None
+                    halign: 'center'
+                    valign: 'middle'
+                    canvas.before:
+                        Color:
+                            rgba: 0, 0, 0, 0.6
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [10,]
+
+                Button:
+                    text: "ยอมแพ้ / กลับหน้าเลือกด่าน"
+                    font_name: 'assets/fonts/font.ttf'
+                    size_hint_y: None
+                    height: 40
+                    background_normal: ''
+                    background_color: 0.8, 0.3, 0.3, 0.9
+                    on_release: root.give_up()
 
 # ----------------- หน้า 4: สะสมดอกไม้ -----------------
 <CollectionScreen>:
