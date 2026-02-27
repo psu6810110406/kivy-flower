@@ -88,8 +88,9 @@ class GameScreen(Screen):
         if self.growth_progress >= 100: return
         if app.stamina >= 10:
             app.stamina -= 10
-            self.growth_progress += 15
-            self.update_status("รดน้ำแล้ว! ต้นไม้สดชื่น (+15%)")
+            bonus = 20 if app.weather == "แดดจัด" else 10
+            self.growth_progress += bonus
+            self.update_status(f"รดน้ำในวัน {app.weather} (+{bonus}%)")
             self.check_win()
         else:
             self.update_status("พลังงานไม่พอ! ต้องพักก่อน")
@@ -134,6 +135,12 @@ class GameScreen(Screen):
         app = App.get_running_app()
         app.root.current = "levels"
 
+    def next_day(self):
+        app = App.get_running_app()
+        app.stamina = 100  # รีเซ็ตพลังงาน
+        # อาจจะมีการสุ่มสภาพอากาศ หรือเหตุการณ์พิเศษตรงนี้
+        self.update_status("เช้าวันใหม่! พลังงานเต็มแล้ว")
+
 # 2. สร้างตัวจัดการหน้าจอ
 class WindowManager(ScreenManager):
     pass
@@ -142,6 +149,7 @@ class WindowManager(ScreenManager):
 class FlowerApp(App):
     money = NumericProperty(100)
     stamina = NumericProperty(100)
+    weather = StringProperty("แดดจัด")
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -151,6 +159,14 @@ class FlowerApp(App):
     def build(self):
         # โหลดไฟล์ garden.kv ตามข้อกำหนด
         return Builder.load_file('garden.kv')
+
+    def next_day(self):
+        self.stamina = 100
+        weathers = ["แดดจัด", "ฝนตก", "เมฆมาก", "พายุเข้า"]
+        self.weather = random.choice(weathers)
+        # แจ้งเตือนผ่านหน้า GameScreen (ถ้าอยู่ในหน้านั้น)
+        curr_screen = self.root.get_screen('game')
+        curr_screen.update_status(f"เริ่มต้นวันใหม่! สภาพอากาศวันนี้: {self.weather}")
 
     def start_game(self, flower_name):
         self.current_playing_flower = flower_name
