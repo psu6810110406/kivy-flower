@@ -19,17 +19,48 @@ class MenuScreen(Screen):
 class LevelScreen(Screen):
     pass
 
+from kivy.uix.scatter import Scatter
+from kivy.uix.image import Image
 
+class DraggableFlower(Scatter):
+    def __init__(self, flower_type, **kwargs):
+        super().__init__(**kwargs)
+        self.size_hint = (None, None)
+        self.size = (100, 100)
+        self.do_rotation = False
+        img_src = f"assets/images/{flower_type}_3.png"
+        if not os.path.exists(img_src): img_src = "assets/images/flower_3.png"
+        self.add_widget(Image(source=img_src, size=self.size))
 
 class CollectionScreen(Screen):
     def on_pre_enter(self, *args):
         app = App.get_running_app()
+        self.ids.inventory_grid.clear_widgets()
         if len(app.unlocked_flowers) == 0:
-            self.ids.collection_lbl.text = "ยังไม่มีดอกไม้เลย ไปปลูกกันเถอะ!"
+            pass # No flowers yet
         else:
-            flowers_th = {"rose": "กุหลาบ", "tulip": "ทิวลิป", "daisy": "เดซี่", "sunflower": "ทานตะวัน", "hibiscus": "ชบา", "กล้วยไม้": "กล้วยไม้", "มะลิ": "มะลิ", "กระบองเพชร": "กระบองเพชร"}
-            unlocked_names = [flowers_th.get(f, f) for f in app.unlocked_flowers]
-            self.ids.collection_lbl.text = "ปลูกสำเร็จ:\n" + "\n".join(unlocked_names)
+            for f in app.unlocked_flowers:
+                flower = DraggableFlower(flower_type=f)
+                self.ids.inventory_grid.add_widget(flower)
+
+    def on_touch_move(self, touch):
+        if 'button' in touch.profile and touch.button == 'right':
+            with self.canvas.after:
+                from kivy.graphics import Color, Line
+                Color(0.4, 0.7, 1, 0.5) # สีน้ำฟ้าใส
+                Line(points=[touch.ox, touch.oy, touch.x, touch.y], width=2)
+            
+            for child in self.ids.garden_area.children:
+                if child.collide_point(*touch.pos):
+                    from kivy.animation import Animation
+                    anim = Animation(scale=1.1, duration=0.1) + Animation(scale=1.0, duration=0.1)
+                    anim.start(child)
+        return super().on_touch_move(touch)
+
+    def on_touch_up(self, touch):
+        if 'button' in touch.profile and touch.button == 'right':
+            self.canvas.after.clear()
+        return super().on_touch_up(touch)
 
 class GameScreen(Screen):
     growth_progress = NumericProperty(0)
