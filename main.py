@@ -32,6 +32,30 @@ class DraggableFlower(Scatter):
         if not os.path.exists(img_src): img_src = "assets/images/flower_3.png"
         self.add_widget(Image(source=img_src, size=self.size))
 
+class InventoryFlower(Image):
+    def __init__(self, flower_type, **kwargs):
+        super().__init__(**kwargs)
+        self.flower_type = flower_type
+        self.size_hint = (None, None)
+        self.size = (100, 100)
+        img_src = f"assets/images/{flower_type}_3.png"
+        if not os.path.exists(img_src): img_src = "assets/images/flower_3.png"
+        self.source = img_src
+
+    def on_touch_down(self, touch):
+        if self.collide_point(*touch.pos):
+            app = App.get_running_app()
+            screen = app.root.get_screen('collection')
+            
+            flower = DraggableFlower(flower_type=self.flower_type)
+            flower.center = touch.pos
+            screen.ids.garden_area.add_widget(flower)
+            
+            # Make the new scatter widget grab the touch to start dragging immediately
+            flower.on_touch_down(touch)
+            return True
+        return super().on_touch_down(touch)
+
 class CollectionScreen(Screen):
     def on_pre_enter(self, *args):
         app = App.get_running_app()
@@ -40,11 +64,11 @@ class CollectionScreen(Screen):
             pass # No flowers yet
         else:
             for f in app.unlocked_flowers:
-                flower = DraggableFlower(flower_type=f)
+                flower = InventoryFlower(flower_type=f)
                 self.ids.inventory_grid.add_widget(flower)
-
     def on_touch_move(self, touch):
         if 'button' in touch.profile and touch.button == 'right':
+            self.canvas.after.clear()
             with self.canvas.after:
                 from kivy.graphics import Color, Line
                 Color(0.4, 0.7, 1, 0.5) # สีน้ำฟ้าใส

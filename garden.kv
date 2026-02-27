@@ -37,7 +37,7 @@ WindowManager:
     FloatLayout:
         Image:
             source: "assets/images/garden.png"
-            fit_mode: "cover"
+            fit_mode: "fill"
 
         BoxLayout:
             orientation: 'vertical'
@@ -81,7 +81,7 @@ WindowManager:
         # พื้นหลังเรือนกระจก / ระเบียงต้นไม้
         Image:
             source: "assets/images/garden.png" 
-            fit_mode: "cover"
+            fit_mode: "fill"
 
         # เลเยอร์สีจางๆ เพื่อให้อ่านตัวหนังสือและเห็นปุ่มชัดขึ้น
         Widget:
@@ -165,7 +165,7 @@ WindowManager:
         # 1. พื้นหลังที่ปรับตามขนาดหน้าจออัตโนมัติ
         Image:
             source: "assets/images/garden.png"
-            fit_mode: "cover"
+            fit_mode: "fill"
 
         # 2. แผงควบคุมสไตล์ Minimal (ลอยอยู่ด้านหน้า)
         BoxLayout:
@@ -245,8 +245,7 @@ WindowManager:
                         id: flower_img
                         source: root.flower_image_source
                         size: flower_scatter.size
-                        allow_stretch: True
-                        keep_ratio: True
+                        fit_mode: "contain"
 
                 Label:
                     id: result_lbl
@@ -318,6 +317,8 @@ WindowManager:
         Image:
             source: "assets/images/garden.png"  # ภาพสวนที่มีดอกไม้เต็ม
             fit_mode: "cover"
+            size_hint: 1, 1
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
         # 2. พื้นที่สำหรับวางดอกไม้ที่ปลูกสำเร็จ (ใช้สำหรับลากวาง)
         # เราจะสร้าง Widget เปล่าไว้รับการลากวางตรงนี้
