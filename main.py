@@ -45,7 +45,7 @@ class GameScreen(Screen):
         self.target_sun = random.randint(1, 8)
         self.target_fert = random.randint(1, 4)
         
-        self.ids.flower_img.source = f"{self.current_flower}_0.png"
+        self.ids.flower_img.source = "seed.png"
         self.ids.result_lbl.text = "รอการตรวจสอบ..."
         
         self.ids.spin_water.text = 'น้ำ (1-5)'
@@ -61,27 +61,44 @@ class GameScreen(Screen):
             feedback = []
             correct_count = 0
             
-            if w < self.target_water: feedback.append("น้ำน้อย")
-            elif w > self.target_water: feedback.append("น้ำมาก")
+            # --- (โค้ดเช็คน้ำ แดด ปุ๋ย ของเดิมปล่อยไว้เหมือนเดิมครับ) ---
+            if w < self.target_water: feedback.append("น้ำน้อยไป")
+            elif w > self.target_water: feedback.append("น้ำมากไป")
             else:
                 feedback.append("น้ำพอดี")
                 correct_count += 1
             
-            if s < self.target_sun: feedback.append("แดดน้อย")
-            elif s > self.target_sun: feedback.append("แดดมาก")
+            if s < self.target_sun: feedback.append("แดดน้อยไป")
+            elif s > self.target_sun: feedback.append("แดดมากไป")
             else:
                 feedback.append("แดดพอดี")
                 correct_count += 1
             
-            if f < self.target_fert: feedback.append("ปุ๋ยน้อย")
-            elif f > self.target_fert: feedback.append("ปุ๋ยมาก")
+            if f < self.target_fert: feedback.append("ปุ๋ยน้อยไป")
+            elif f > self.target_fert: feedback.append("ปุ๋ยมากไป")
             else:
                 feedback.append("ปุ๋ยพอดี")
                 correct_count += 1
             
-            self.ids.flower_img.source = f"{self.current_flower}_{correct_count}.png"
-            self.ids.result_lbl.text = " | ".join(feedback)
+            # =========================================================
+            # ส่วนที่ต้องแก้: เปลี่ยนเงื่อนไขการแสดงรูปภาพ
+            # =========================================================
+            if correct_count == 0:
+                self.ids.flower_img.source = "seed.png"  # ผิดหมด = เมล็ด
+            elif correct_count == 1:
+                self.ids.flower_img.source = "sprout.png"  # ถูก 1 อย่าง = ต้นอ่อน
+            elif correct_count == 2:
+                # ถูก 2 อย่าง = ยังไม่บาน (ใช้ชื่อดอกไม้ ตามด้วย _2.png)
+                self.ids.flower_img.source = f"{self.current_flower}_2.png"
+            elif correct_count == 3:
+                # ถูก 3 อย่าง = บานแล้ว (ใช้ชื่อดอกไม้ ตามด้วย _3.png)
+                self.ids.flower_img.source = f"{self.current_flower}_3.png"
+            # =========================================================
+
+            # อัปเดตข้อความเฉลย
+            self.ids.result_lbl.text = "\n".join(feedback)
             
+            # ถ้าถูกหมด 3 อย่าง
             if correct_count == 3:
                 self.ids.result_lbl.text = "ยินดีด้วย! ดอกไม้บานแล้ว!"
                 app = App.get_running_app()
