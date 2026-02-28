@@ -1,0 +1,16 @@
+# สั่งให้ Git ไม่เก็บโฟลเดอร์ Virtual Environment
+.venv/
+venv/
+ENV/
+
+# สั่งให้ Git ไม่เก็บไฟล์ขยะของ Python (พวกไฟล์แคช)
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# สั่งให้ Git ไม่เก็บไฟล์ตั้งค่าของ VS Code (ถ้าคุณต้องการ)
+.vscode/
+
+# สั่งให้ Git ไม่เก็บไฟล์ขยะของระบบ Windows/Mac
+Thumbs.db
+.DS_Store

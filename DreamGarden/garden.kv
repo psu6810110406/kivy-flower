@@ -1,0 +1,460 @@
+# garden.kv
+# ประกาศตัวจัดการหน้าจอ
+WindowManager:
+    MenuScreen:
+    LevelScreen:
+    GameScreen:
+    CollectionScreen:
+
+<MinimalButton@Button>:
+    font_name: 'assets/fonts/font.ttf'
+    font_size: '20sp'
+    background_normal: ''
+    background_color: 0.2, 0.4, 0.2, 0.7
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 0.1
+        Line:
+            width: 1.2
+            rounded_rectangle: (self.x, self.y, self.width, self.height, 10)
+
+<EarthButton@Button>:
+    font_name: 'assets/fonts/font.ttf'
+    font_size: '24sp'
+    background_normal: '' 
+    canvas.before:
+        PushMatrix
+        Scale:
+            origin: self.center
+            x: 1.05 if self.state == 'down' else 1
+            y: 1.05 if self.state == 'down' else 1
+    canvas.after:
+        PopMatrix
+
+# ----------------- หน้า 1: เมนูหลัก -----------------
+<MenuScreen>:
+    name: "menu"
+    FloatLayout:
+        Image:
+            source: "assets/images/garden.png"
+            fit_mode: "fill"
+
+        BoxLayout:
+            orientation: 'vertical'
+            padding: [40, 100, 40, 40]
+            spacing: 20
+            size_hint: 0.8, 0.9
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+            Label:
+                text: "Apartment Garden"
+                font_name: 'assets/fonts/font.ttf'
+                font_size: '42sp'
+                color: 1, 1, 1, 1
+                bold: True
+
+            Widget: 
+                size_hint_y: 0.3
+
+            MinimalButton:
+                text: "Start Journey"
+                size_hint_y: None
+                height: 80
+                on_release: app.root.current = "levels"
+            
+            MinimalButton:
+                text: "My Collection"
+                size_hint_y: None
+                height: 80
+                on_release: app.root.current = "collection"
+                
+            MinimalButton:
+                text: "How to Play"
+                size_hint_y: None
+                height: 80
+                on_release: app.show_how_to_play()
+
+# ----------------- หน้า 2: เลือกด่าน (เรือนกระจก) -----------------
+<LevelScreen>:
+    name: "levels"
+    FloatLayout:
+        # พื้นหลังเรือนกระจก / ระเบียงต้นไม้
+        Image:
+            source: "assets/images/garden.png" 
+            fit_mode: "fill"
+
+        # เลเยอร์สีจางๆ เพื่อให้อ่านตัวหนังสือและเห็นปุ่มชัดขึ้น
+        Widget:
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 0.4  # พื้นหลังดำโปร่งแสง 40%
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [20,]
+
+        BoxLayout:
+            orientation: "vertical"
+            padding: [40, 60, 40, 40]
+            spacing: 20
+            size_hint_x: None
+            width: min(self.parent.width * 0.9, 800)
+            size_hint_y: 0.95
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+            Label:
+                text: "เรือนกระจก (Greenhouse)"
+                font_name: 'assets/fonts/font.ttf'
+                font_size: '36sp'
+                color: 0.1, 0.4, 0.1, 1  # สีเขียวเข้ม
+                outline_width: 1
+                size_hint_y: None
+                height: 60
+
+            Label:
+                text: "เลือกกระถางและเมล็ดพันธุ์ที่คุณต้องการปลูกวันนี้"
+                font_name: 'assets/fonts/font.ttf'
+                font_size: '20sp'
+                color: 0.2, 0.3, 0.2, 1
+                size_hint_y: None
+                height: 40
+
+            # ใช้ GridLayout เพื่อเรียงปุ่ม
+            GridLayout:
+                cols: 2
+                spacing: 15
+                
+                EarthButton:
+                    text: "กุหลาบ"
+                    background_color: 0.6, 0.3, 0.3, 0.9 # Earth Tone Muted Red
+                    on_release: app.start_game("rose")
+                EarthButton:
+                    text: "ทิวลิป"
+                    background_color: 0.5, 0.4, 0.5, 0.9 # Earth Tone Muted Purple
+                    on_release: app.start_game("tulip")
+                EarthButton:
+                    text: "เดซี่"
+                    background_color: 0.6, 0.6, 0.3, 0.9 # Earth Tone Olive Yellow
+                    on_release: app.start_game("daisy")
+                EarthButton:
+                    text: "ทานตะวัน"
+                    background_color: 0.7, 0.5, 0.2, 0.9 # Earth Tone Ochre
+                    on_release: app.start_game("sunflower")
+                EarthButton:
+                    text: "ชบา"
+                    background_color: 0.7, 0.3, 0.3, 0.9 # Earth Tone Rust
+                    on_release: app.start_game("hibiscus")
+
+            Widget:
+                size_hint_y: None
+                height: 20
+
+            MinimalButton:
+                text: "Back to Menu"
+                size_hint_y: None
+                height: 70
+                size_hint_x: 0.6
+                pos_hint: {'center_x': 0.5}
+                background_color: 0.5, 0.6, 0.5, 0.9 # สีเทาอมเขียว
+                on_release: app.root.current = "menu"
+
+# --- กำหนด Custom Widget สำหรับ Vertical ProgressBar ---
+<VerticalProgressBar@Widget>:
+    value: 0
+    max: 100
+    bar_color: 0.2, 0.7, 0.5, 1 # สีเริ่มต้น (เขียว)
+    canvas.before:
+        # พื้นหลังของหลอด
+        Color:
+            rgba: 0, 0, 0, 0.4
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [10,]
+        # ตัวหลอดสีที่ขยับขึ้นลงตาม value
+        Color:
+            rgba: self.bar_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.width, self.height * (self.value / float(self.max)) if self.max else 0
+            radius: [10,]
+
+# ----------------- หน้า 3: เล่นเกม (แบบใหม่) -----------------
+<GameScreen>:
+    name: "game"
+    FloatLayout:
+        # 1. พื้นหลังที่ปรับตามขนาดหน้าจออัตโนมัติ
+        Image:
+            source: "assets/images/garden.png"
+            fit_mode: "fill"
+
+        # 2. แผงควบคุมสไตล์ Minimal (ลอยอยู่ด้านหน้า)
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_x: None
+            width: min(self.parent.width * 0.9, 800)
+            size_hint_y: 0.95
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            padding: 20
+            spacing: 15
+
+            # ----------------- กรอบแสดงสภาพอากาศ (อยู่ด้านบนตรงกลาง) -----------------
+            BoxLayout:
+                size_hint_y: 0.1
+                canvas.before:
+                    Color:
+                        rgba: 1, 1, 1, 0.15 # สีขาวจางๆ
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [15,]
+                Label:
+                    text: f"สภาพอากาศ: {app.weather}"
+                    font_name: 'assets/fonts/font.ttf'
+                    font_size: '22sp'
+                    color: 1, 0.8, 0, 1
+
+            # ----------------- พื้นที่ปลูกต้นไม้และป้ายสถานะ (ตรงกลาง) -----------------
+            FloatLayout:
+                size_hint_y: 0.7
+
+                # ----------------- หลอดพลังงานแนวตั้ง (ซ้าย) -----------------
+                BoxLayout:
+                    id: stamina_box
+                    orientation: 'vertical'
+                    size_hint: None, 0.6
+                    width: 60
+                    pos_hint: {'x': 0.02, 'center_y': 0.5}
+                    spacing: 10
+                    
+                    Label:
+                        text: "พลังงาน"
+                        font_name: 'assets/fonts/font.ttf'
+                        font_size: '18sp'
+                        size_hint_y: None
+                        height: 30
+                        canvas.before:
+                            Color:
+                                rgba: 0, 0, 0, 0.5
+                            RoundedRectangle:
+                                pos: self.pos
+                                size: self.size
+                                radius: [5,]
+                    VerticalProgressBar:
+                        max: 100
+                        value: app.stamina
+                        bar_color: 0.2, 0.6, 0.8, 1 # สีฟ้าสำหรับพลังงาน
+
+                # ----------------- หลอดการเจริญเติบโตแนวตั้ง (ขวา) -----------------
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint: None, 0.6
+                    width: 60
+                    pos_hint: {'right': 0.98, 'center_y': 0.5}
+                    spacing: 10
+                    
+                    Label:
+                        text: "เติบโต"
+                        font_name: 'assets/fonts/font.ttf'
+                        font_size: '18sp'
+                        size_hint_y: None
+                        height: 30
+                        canvas.before:
+                            Color:
+                                rgba: 0, 0, 0, 0.5
+                            RoundedRectangle:
+                                pos: self.pos
+                                size: self.size
+                                radius: [5,]
+                    VerticalProgressBar:
+                        id: growth_bar
+                        max: 100
+                        value: root.growth_progress
+                        bar_color: 0.2, 0.8, 0.2, 1 # สีเขียวสำหรับต้นไม้
+
+                Label:
+                    id: title_lbl
+                    text: "กำลังปลูก..."
+                    font_name: 'assets/fonts/font.ttf'
+                    font_size: '22sp'
+                    size_hint_y: None
+                    height: 40
+                    size_hint_x: 0.4
+                    pos_hint: {'center_x': 0.5, 'top': 0.88}
+                    canvas.before:
+                        Color:
+                            rgba: 0, 0, 0, 0.5
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [10,]
+                
+                Scatter:
+                    id: flower_scatter
+                    size_hint: None, None
+                    size: 300, 300
+                    # เลี่ยงการใช้ pos_hint เพื่อไม่ให้ FloatLayout เกิด Infinite Loop เมื่อขนาดเปลี่ยน
+                    pos: self.parent.center_x - self.width/2, self.parent.center_y - self.height/2
+                    do_rotation: False
+                    auto_bring_to_front: False
+                    scale_min: 0.5
+                    scale_max: 3.0
+                    
+                    Image:
+                        id: flower_img
+                        source: root.flower_image_source
+                        # เอาขนาดผูกกับ Scatter ตามเดิม ไม่หลุดเฟรม
+                        size: flower_scatter.size
+                        fit_mode: "contain"
+
+                Label:
+                    id: result_lbl
+                    text: "รอดูผลการดูแล..."
+                    font_name: 'assets/fonts/font.ttf'
+                    font_size: '20sp'
+                    size_hint_y: None
+                    height: 40
+                    size_hint_x: 0.8
+                    pos_hint: {'center_x': 0.5, 'y': 0}
+                    text_size: self.width, None
+                    halign: 'center'
+                    valign: 'middle'
+                    canvas.before:
+                        Color:
+                            rgba: 0, 0, 0, 0.5
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [10,]
+
+            # ปรับเปลี่ยนปุ่มเมื่อโตเต็มที่
+            FloatLayout:
+                size_hint_y: 0.2
+
+                # ปุ่มกดแบบ Minimal ปกติ
+                GridLayout:
+                    cols: 3
+                    size_hint: 1, 1
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5} if root.growth_progress < 100 else {'top': 2.0}
+                    spacing: 15
+                    opacity: 1 if root.growth_progress < 100 else 0
+                    disabled: root.growth_progress >= 100
+                    
+                    Button:
+                        text: "รดน้ำ"
+                        font_name: 'assets/fonts/font.ttf'
+                        font_size: '20sp'
+                        background_normal: '' 
+                        background_color: 0.2, 0.5, 0.8, 0.8
+                        on_release: root.water_plant()
+                    Button:
+                        text: "ใส่ปุ๋ย"
+                        font_name: 'assets/fonts/font.ttf'
+                        font_size: '20sp'
+                        background_normal: '' 
+                        background_color: 0.8, 0.6, 0.2, 0.8
+                        on_release: root.fertilize_plant()
+                    Button:
+                        text: "พรวนดิน"
+                        font_name: 'assets/fonts/font.ttf'
+                        font_size: '20sp'
+                        background_normal: '' 
+                        background_color: 0.6, 0.4, 0.2, 0.8
+                        on_release: root.till_soil()
+                    Button:
+                        text: "พักผ่อน"
+                        font_name: 'assets/fonts/font.ttf'
+                        font_size: '20sp'
+                        background_normal: '' 
+                        background_color: 0.2, 0.7, 0.5, 0.8
+                        on_release: app.next_day()
+                    Button:
+                        text: "ออกชั่วคราว"
+                        font_name: 'assets/fonts/font.ttf'
+                        font_size: '20sp'
+                        background_normal: '' 
+                        background_color: 0.5, 0.5, 0.5, 0.8
+                        on_release: root.temp_exit()
+                    Button:
+                        text: "ยอมแพ้"
+                        font_name: 'assets/fonts/font.ttf'
+                        font_size: '20sp'
+                        background_normal: '' 
+                        background_color: 0.8, 0.3, 0.3, 0.8
+                        on_release: root.give_up()
+
+                # ปุ่มเก็บเกี่ยว (แสดงเมื่อ 100%)
+                Button:
+                    text: "ย้ายกระถางดอกไม้!"
+                    font_name: 'assets/fonts/font.ttf'
+                    font_size: '24sp'
+                    size_hint: 0.8, 0.8
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5} if root.growth_progress >= 100 else {'top': 2.0}
+                    background_normal: '' 
+                    background_color: 0.8, 0.6, 0.2, 0.9 # สีทอง
+                    opacity: 1 if root.growth_progress >= 100 else 0
+                    disabled: root.growth_progress < 100
+                    on_release: root.collect_flower()
+
+        # Tooltip สำหรับ Hover พลังงาน
+        Label:
+            id: tooltip_lbl
+            text: ""
+            font_name: 'assets/fonts/font.ttf'
+            font_size: '18sp'
+            size_hint: None, None
+            size: self.texture_size[0] + 20, self.texture_size[1] + 10
+            pos: 0, -100 # ซ่อนไว้นอกจอก่อน
+            opacity: 0
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 0.8
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [5,]
+
+# ----------------- หน้า 4: สะสมดอกไม้ -----------------
+<CollectionScreen>:
+    name: "collection"
+    FloatLayout:
+        # 1. ฉากหลังสวนดอกไม้ที่สวยงาม
+        Image:
+            source: "assets/images/garden.png"  # ภาพสวนที่มีดอกไม้เต็ม
+            fit_mode: "cover"
+            size_hint: 1, 1
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+        # 2. พื้นที่สำหรับวางดอกไม้ที่ปลูกสำเร็จ (ใช้สำหรับลากวาง)
+        # เราจะสร้าง Widget เปล่าไว้รับการลากวางตรงนี้
+        RelativeLayout:
+            id: garden_area
+
+        # 3. แถบเก็บดอกไม้ (Inventory) ด้านล่าง
+        BoxLayout:
+            size_hint: 1, 0.2
+            pos_hint: {'x': 0, 'y': 0}
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 0.6
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            
+            ScrollView:
+                do_scroll_y: False
+                GridLayout:
+                    id: inventory_grid
+                    rows: 1
+                    size_hint_x: None
+                    width: self.minimum_width
+                    padding: 10
+                    spacing: 10
+
+        # 4. ปุ่มกลับ
+        Button:
+            text: "Back"
+            font_name: 'assets/fonts/font.ttf'
+            size_hint: 0.15, 0.08
+            pos_hint: {'right': 0.98, 'top': 0.98}
+            on_release: app.root.current = "menu"
