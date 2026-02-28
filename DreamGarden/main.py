@@ -1,4 +1,5 @@
 import os
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 os.environ['KIVY_TEXT'] = 'pil'
 import database
 
@@ -28,7 +29,7 @@ class DraggableFlower(Scatter):
     def __init__(self, flower_type, **kwargs):
         super().__init__(**kwargs)
         self.size_hint = (None, None)
-        self.size = (100, 100)
+        self.size = (200, 200)
         self.do_rotation = False
         img_src = f"assets/images/{flower_type}_3.png"
         if not os.path.exists(img_src): img_src = "assets/images/flower_3.png"
@@ -39,7 +40,7 @@ class InventoryFlower(Image):
         super().__init__(**kwargs)
         self.flower_type = flower_type
         self.size_hint = (None, None)
-        self.size = (100, 100)
+        self.size = (200, 200)
         img_src = f"assets/images/{flower_type}_3.png"
         if not os.path.exists(img_src): img_src = "assets/images/flower_3.png"
         self.source = img_src
@@ -140,6 +141,8 @@ class GameScreen(Screen):
         if self.current_flower in app.flower_progress:
             self.growth_progress = app.flower_progress[self.current_flower]
             self.ids.result_lbl.text = "กลับมาดูแลต่อแล้ว!"
+            self.ids.flower_scatter.scale = 1.5
+            self.ids.flower_scatter.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
         else:
             self.reset_game()
 
@@ -148,7 +151,8 @@ class GameScreen(Screen):
         self.flower_image_source = self.get_flower_image(0)
         self.ids.result_lbl.text = "เริ่มปลูกต้นไม้กันเลย!"
         # คืนค่าสเกลให้ต้นไม้
-        self.ids.flower_scatter.scale = 1.0
+        self.ids.flower_scatter.scale = 2.0
+        self.ids.flower_scatter.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
 
     def temp_exit(self):
         # บันทึกสถานะการเติบโตของดอกไม้ปัจจุบันก่อนออก
@@ -162,7 +166,13 @@ class GameScreen(Screen):
             return "assets/images/seed.png"
         elif state == 1:
             return "assets/images/sprout.png"
+            
         path = f"assets/images/{self.current_flower}_{state}.png"
+        
+        # เพิ่ม 2 บรรทัดนี้เพื่อเช็คตำแหน่งที่ Python มองหาไฟล์
+        import os
+        print(f"[Debug] กำลังค้นหาไฟล์ที่: {os.path.abspath(path)}") 
+        
         if os.path.exists(path):
             return path
         return f"assets/images/flower_{state}.png"
