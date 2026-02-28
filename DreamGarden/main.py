@@ -1,5 +1,6 @@
 import os
 os.environ['KIVY_TEXT'] = 'pil'
+import database
 
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
@@ -58,6 +59,7 @@ class InventoryFlower(Image):
             # Remove from inventory both visually and from save state
             if self.flower_type in app.unlocked_flowers:
                 app.unlocked_flowers.remove(self.flower_type)
+                app.save_app_state()
             if self.parent:
                 self.parent.remove_widget(self)
                 
@@ -113,12 +115,17 @@ class GameScreen(Screen):
         
         # ถ่ายทอดตำแหน่งเมาส์ในหน้าต่างไปยัง Widget เพื่อเช็คแรงเงา
         stamina_box = self.ids.stamina_box
+        growth_box = self.ids.get('growth_box')
         # แปลงพิกัด mouse เป็นพิกัดของ stamina_box (ถ้ามันถูกครอบด้วย layout อื่น)
         # เนื่องจากกล่องพิกัดอาจคาดเคลื่อน ให้หาว่าพิกัดนั้นชนกับ Bounding box ของ widget หรือไม่
         if stamina_box.collide_point(*pos):
             self.ids.tooltip_lbl.opacity = 1
             self.ids.tooltip_lbl.pos = (pos[0] + 15, pos[1] + 15)
             self.ids.tooltip_lbl.text = f"พลังงานเหลือ: {App.get_running_app().stamina} / 100"
+        elif growth_box and growth_box.collide_point(*pos):
+            self.ids.tooltip_lbl.opacity = 1
+            self.ids.tooltip_lbl.pos = (pos[0] - self.ids.tooltip_lbl.width - 15, pos[1] + 15)
+            self.ids.tooltip_lbl.text = f"ความเติบโต: {self.growth_progress:.1f} / 100"
         else:
             self.ids.tooltip_lbl.opacity = 0
 
@@ -147,9 +154,14 @@ class GameScreen(Screen):
         # บันทึกสถานะการเติบโตของดอกไม้ปัจจุบันก่อนออก
         app = App.get_running_app()
         app.flower_progress[self.current_flower] = self.growth_progress
+        app.save_app_state()
         app.root.current = "levels"
 
     def get_flower_image(self, state):
+        if state == 0:
+            return "assets/images/seed.png"
+        elif state == 1:
+            return "assets/images/sprout.png"
         path = f"assets/images/{self.current_flower}_{state}.png"
         if os.path.exists(path):
             return path
@@ -182,6 +194,7 @@ class GameScreen(Screen):
             anim.start(sc)
             
             self.check_win()
+            app.save_app_state()
         else:
             self.update_status("พลังงานไม่พอ! ต้องพักก่อน")
 
@@ -193,6 +206,7 @@ class GameScreen(Screen):
             self.growth_progress += 25
             self.update_status("ใส่ปุ๋ยแล้ว! ต้นไม้โตไวมาก (+25%)")
             self.check_win()
+            app.save_app_state()
         else:
             self.update_status("พลังงานไม่พอ! ต้องพักก่อน")
 
@@ -204,6 +218,7 @@ class GameScreen(Screen):
             self.growth_progress += 10
             self.update_status("พรวนดินเรียบร้อย! ดินร่วนซุย (+10%)")
             self.check_win()
+            app.save_app_state()
         else:
             self.update_status("พลังงานไม่พอ! ต้องพักก่อน")
 
@@ -226,11 +241,17 @@ class GameScreen(Screen):
             # กลับไปหน้าหลัก
             app.root.current = "menu"
             app.stamina += 30 # ได้โบนัสพลังงานคืน
+            if self.current_flower in app.flower_progress:
+                del app.flower_progress[self.current_flower]
+            app.save_app_state()
             print("You won!")
 
     def give_up(self):
         self.reset_game()
         app = App.get_running_app()
+        if self.current_flower in app.flower_progress:
+            del app.flower_progress[self.current_flower]
+        app.save_app_state()
         app.root.current = "levels"
 
     def next_day(self):
@@ -250,9 +271,22 @@ class FlowerApp(App):
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.icon = 'assets/images/sunflower_3.png'
         self.current_playing_flower = "rose" 
-        self.unlocked_flowers = []
-        self.flower_progress = {} # เก็บค่า progress ชั่วคราวของกระถางแต่ละพันธุ์
+        
+        data = database.load_data()
+        self.unlocked_flowers = data.get("unlocked_flowers", [])
+        self.flower_progress = data.get("flower_progress", {})
+        self.stamina = data.get("stamina", 100)
+        self.weather = data.get("weather", "แดดจัด")
+
+    def save_app_state(self):
+        database.save_data({
+            "unlocked_flowers": self.unlocked_flowers,
+            "flower_progress": self.flower_progress,
+            "stamina": self.stamina,
+            "weather": self.weather
+        })
 
     def build(self):
         # โหลดไฟล์ garden.kv ตามข้อกำหนด
@@ -265,6 +299,7 @@ class FlowerApp(App):
         # แจ้งเตือนผ่านหน้า GameScreen (ถ้าอยู่ในหน้านั้น)
         curr_screen = self.root.get_screen('game')
         curr_screen.update_status(f"เริ่มต้นวันใหม่! สภาพอากาศวันนี้: {self.weather}")
+        self.save_app_state()
 
     def start_game(self, flower_name):
         self.current_playing_flower = flower_name
@@ -333,7 +368,7 @@ class FlowerApp(App):
             separator_height=0, # ซ่อนเส้นคั่นเดิม
             content=content,
             size_hint=(0.85, 0.85),
-            background='assets/images/ui_bg.png', # ใช้รูปสวนจางๆ เป็นพื้นหลัง Popup
+            background='assets/images/bg_garden.png', # ใช้รูปสวนจางๆ เป็นพื้นหลัง Popup
             background_color=(1, 1, 1, 0.9) # ปรับความสว่างให้เนื้อหาอ่านง่าย
         )
         
