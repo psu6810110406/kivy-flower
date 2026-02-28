@@ -9,6 +9,7 @@ from kivy.properties import NumericProperty, StringProperty
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.button import Button
+from kivy.uix.gridlayout import GridLayout
 from kivy.animation import Animation
 import random
 
