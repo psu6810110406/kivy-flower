@@ -46,12 +46,55 @@ WindowManager:
             size_hint: 0.8, 0.9
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
-            Label:
-                text: "Apartment Garden"
-                font_name: 'assets/fonts/font.ttf'
-                font_size: '42sp'
-                color: 1, 1, 1, 1
-                bold: True
+            # --- ลบ Label ตัวเก่าออก แล้วใส่ FloatLayout นี้แทน ---
+            # --- เปลี่ยน FloatLayout เป็นแบบนี้ครับ ---
+            FloatLayout:
+                size_hint_y: None
+                height: 80
+                
+                # --- เลเยอร์สีน้ำตาล 4 ทิศ (ทำหน้าที่เป็นขอบหนาๆ) ---
+                # 1. เฉียงซ้ายบน
+                Label:
+                    text: "Apartment Garden"
+                    font_name: 'assets/fonts/titlefont.ttf'
+                    font_size: '48sp'
+                    color: 0.4, 0.2, 0.1, 1
+                    bold: True
+                    pos_hint: {'center_x': 0.495, 'center_y': 0.53}
+                # 2. เฉียงขวาบน
+                Label:
+                    text: "Apartment Garden"
+                    font_name: 'assets/fonts/titlefont.ttf'
+                    font_size: '48sp'
+                    color: 0.4, 0.2, 0.1, 1
+                    bold: True
+                    pos_hint: {'center_x': 0.505, 'center_y': 0.53}
+                # 3. เฉียงซ้ายล่าง
+                Label:
+                    text: "Apartment Garden"
+                    font_name: 'assets/fonts/titlefont.ttf'
+                    font_size: '48sp'
+                    color: 0.4, 0.2, 0.1, 1
+                    bold: True
+                    pos_hint: {'center_x': 0.495, 'center_y': 0.47}
+                # 4. เฉียงขวาล่าง
+                Label:
+                    text: "Apartment Garden"
+                    font_name: 'assets/fonts/titlefont.ttf'
+                    font_size: '48sp'
+                    color: 0.4, 0.2, 0.1, 1
+                    bold: True
+                    pos_hint: {'center_x': 0.505, 'center_y': 0.47}
+
+                # --- เลเยอร์ตัวหนังสือสีขาว (วางทับตรงกลางพอดี) ---
+                Label:
+                    text: "Apartment Garden"
+                    font_name: 'assets/fonts/titlefont.ttf'
+                    font_size: '48sp'
+                    color: 1, 1, 1, 1
+                    bold: True
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            # -----------------------------------------------
 
             Widget: 
                 size_hint_y: 0.3
