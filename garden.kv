@@ -188,6 +188,7 @@ WindowManager:
                         size: self.size
                         radius: [15,]
                 Label:
+                    id: stamina_box
                     text: f"พลังงาน: {app.stamina}"
                     font_name: 'assets/fonts/font.ttf'
                     font_size: '20sp'
@@ -331,6 +332,23 @@ WindowManager:
                     opacity: 1 if root.growth_progress >= 100 else 0
                     disabled: root.growth_progress < 100
                     on_release: root.collect_flower()
+
+        # Tooltip สำหรับแสดงพลังงาน (ซ่อนไว้เริ่มต้น)
+        Label:
+            id: tooltip_lbl
+            text: ""
+            font_name: 'assets/fonts/font.ttf'
+            font_size: '16sp'
+            size_hint: None, None
+            size: self.texture_size[0] + 20, self.texture_size[1] + 10
+            opacity: 0
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 0.8
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [10,]
 
 # ----------------- หน้า 4: สะสมดอกไม้ -----------------
 <CollectionScreen>:
