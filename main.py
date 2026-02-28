@@ -1,6 +1,7 @@
 import os
 os.environ['KIVY_TEXT'] = 'pil'
 
+from kivy.uix.gridlayout import GridLayout
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
