@@ -13,6 +13,7 @@ from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.animation import Animation
+from kivy.core.audio import SoundLoader
 import random
 
 # 1. สร้างหน้าจอต่างๆ เตรียมไว้ก่อน
@@ -384,6 +385,23 @@ class FlowerApp(App):
         
         close_btn.bind(on_release=popup.dismiss)
         popup.open()
+
+    def on_start(self):
+    # โหลดไฟล์เสียง (อย่าลืมเช็คว่าไฟล์ของคุณนามสกุลอะไร เช่น .mp3 หรือ .wav)
+        self.bg_music = SoundLoader.load('assets/sound/soundbg1.mp3')
+        
+        # ตรวจสอบว่าโหลดไฟล์สำเร็จไหม
+        if self.bg_music:
+            self.bg_music.loop = True  # สั่งให้เล่นวนลูปไปเรื่อยๆ
+            self.bg_music.volume = 0.3 # ปรับระดับความดัง (0.0 ถึง 1.0)
+            self.bg_music.play()
+        self.click_sound = SoundLoader.load('assets/sound/click.mp3')
+
+    def play_click(self):
+        if self.click_sound:
+            # สั่งหยุดก่อนเผื่อผู้เล่นกดปุ่มรัวๆ แล้วค่อยสั่งเล่นใหม่
+            self.click_sound.stop() 
+            self.click_sound.play()
 
 if __name__ == '__main__':
     FlowerApp().run()

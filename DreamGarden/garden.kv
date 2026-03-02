@@ -104,18 +104,21 @@ WindowManager:
                 size_hint_y: None
                 height: 80
                 on_release: app.root.current = "levels"
+                on_press: app.play_click()
             
             MinimalButton:
                 text: "My Collection"
                 size_hint_y: None
                 height: 80
                 on_release: app.root.current = "collection"
+                on_press: app.play_click()
                 
             MinimalButton:
                 text: "How to Play"
                 size_hint_y: None
                 height: 80
                 on_release: app.show_how_to_play()
+                on_press: app.play_click()
 
 # ----------------- หน้า 2: เลือกด่าน (เรือนกระจก) -----------------
 <LevelScreen>:
@@ -170,23 +173,29 @@ WindowManager:
                 EarthButton:
                     text: "กุหลาบ"
                     background_color: 0.6, 0.3, 0.3, 0.9 # Earth Tone Muted Red
+                    on_press: app.play_click()
                     on_release: app.start_game("rose")
+                    
                 EarthButton:
                     text: "ทิวลิป"
                     background_color: 0.5, 0.4, 0.5, 0.9 # Earth Tone Muted Purple
                     on_release: app.start_game("tulip")
+                    on_press: app.play_click()
                 EarthButton:
                     text: "เดซี่"
                     background_color: 0.6, 0.6, 0.3, 0.9 # Earth Tone Olive Yellow
                     on_release: app.start_game("daisy")
+                    on_press: app.play_click()
                 EarthButton:
                     text: "ทานตะวัน"
                     background_color: 0.7, 0.5, 0.2, 0.9 # Earth Tone Ochre
                     on_release: app.start_game("sunflower")
+                    on_press: app.play_click()
                 EarthButton:
                     text: "ชบา"
                     background_color: 0.7, 0.3, 0.3, 0.9 # Earth Tone Rust
                     on_release: app.start_game("hibiscus")
+                    on_press: app.play_click()
 
             Widget:
                 size_hint_y: None
@@ -200,6 +209,7 @@ WindowManager:
                 pos_hint: {'center_x': 0.5}
                 background_color: 0.5, 0.6, 0.5, 0.9 # สีเทาอมเขียว
                 on_release: app.root.current = "menu"
+                on_press: app.play_click()
 
 # --- กำหนด Custom Widget สำหรับ Vertical ProgressBar ---
 <VerticalProgressBar@Widget>:
@@ -419,6 +429,7 @@ WindowManager:
                         background_normal: '' 
                         background_color: 0.5, 0.5, 0.5, 0.8
                         on_release: root.temp_exit()
+                        on_press: app.play_click()
                     Button:
                         text: "ยอมแพ้"
                         font_name: 'assets/fonts/font.ttf'
@@ -426,6 +437,7 @@ WindowManager:
                         background_normal: '' 
                         background_color: 0.8, 0.3, 0.3, 0.8
                         on_release: root.give_up()
+                        on_press: app.play_click()
 
                 # ปุ่มเก็บเกี่ยว (แสดงเมื่อ 100%)
                 Button:
@@ -502,3 +514,4 @@ WindowManager:
             size_hint: 0.15, 0.08
             pos_hint: {'right': 0.98, 'top': 0.98}
             on_release: app.root.current = "menu"
+            on_press: app.play_click()
