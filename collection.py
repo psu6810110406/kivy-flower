@@ -9,9 +9,9 @@ class DraggableFlower(Scatter):
     def __init__(self, flower_type, **kwargs):
         super().__init__(**kwargs)
         self.size_hint = (None, None)
-        self.size = (200, 200)
+        self.size = (400, 400)
         self.do_rotation = False
-        img_src = f"assets/images/{flower_type}_3.png"
+        img_src = f"assets/images/{flower_type}_4.png"
         if not os.path.exists(img_src): img_src = "assets/images/flower_3.png"
         self.add_widget(Image(source=img_src, size=self.size))
 

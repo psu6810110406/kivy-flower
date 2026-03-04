@@ -80,7 +80,7 @@ class FlowerApp(App):
         # ตรวจสอบว่าโหลดไฟล์สำเร็จไหม
         if self.bg_music:
             self.bg_music.loop = True  # สั่งให้เล่นวนลูปไปเรื่อยๆ
-            self.bg_music.volume = 0.3 # ปรับระดับความดัง (0.0 ถึง 1.0)
+            self.bg_music.volume = 0.3 # ปรับระดับความดัง
             self.bg_music.play()
         self.click_sound = SoundLoader.load('assets/sound/click.mp3')
 
