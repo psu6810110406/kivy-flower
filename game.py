@@ -5,6 +5,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.properties import NumericProperty, StringProperty
 from kivy.animation import Animation
 from kivy.core.window import Window
+from kivy.core.audio import SoundLoader
 
 class LevelScreen(Screen):
     pass
@@ -89,15 +90,22 @@ class GameScreen(Screen):
         return f"assets/images/flower_{state}.png"
 
     def on_growth_change(self, instance, value):
-        # เปลี่ยนรูปภาพอัตโนมัติตามความเติบโต
+        # 1. กำหนดรูปภาพใหม่ตามค่าความเติบโต
         if value >= 100:
-            self.flower_image_source = self.get_flower_image(3)
+            new_image = self.get_flower_image(3)
         elif value >= 60:
-            self.flower_image_source = self.get_flower_image(2)
+            new_image = self.get_flower_image(2)
         elif value >= 30:
-            self.flower_image_source = self.get_flower_image(1)
+            new_image = self.get_flower_image(1)
         else:
-            self.flower_image_source = self.get_flower_image(0)
+            new_image = self.get_flower_image(0)
+
+        if self.flower_image_source and self.flower_image_source != new_image:
+            levelup_sound = SoundLoader.load('assets/sound/levelup.mp3') 
+            if levelup_sound:
+                levelup_sound.play()
+
+        self.flower_image_source = new_image
 
     # Action Callbacks ตอบสนองต่อปุ่ม
     def water_plant(self):
