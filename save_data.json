@@ -1,6 +1,19 @@
 {
     "unlocked_flowers": [],
+<<<<<<< Updated upstream
     "flower_progress": {},
     "stamina": 120,
     "weather": "แดดจัด"
+=======
+    "flower_progress": {
+        "rose": {
+            "growth_score": 275,
+            "satisfaction_score": 100,
+            "current_phase": 1,
+            "care_days": 2
+        }
+    },
+    "stamina": 60,
+    "weather": "พายุเข้า"
+>>>>>>> Stashed changes
 }

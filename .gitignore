@@ -14,3 +14,4 @@ ENV/
 # สั่งให้ Git ไม่เก็บไฟล์ขยะของระบบ Windows/Mac
 Thumbs.db
 .DS_Store
+save_data.json

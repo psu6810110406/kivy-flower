@@ -271,6 +271,33 @@ WindowManager:
                         value: app.stamina
                         bar_color: 0.2, 0.6, 0.8, 1 # สีฟ้าสำหรับพลังงาน
 
+                # ----------------- หลอดความเอาใจใส่แนวตั้ง (ซ้ายถัดจากพลังงาน) -----------------
+                BoxLayout:
+                    id: care_box
+                    orientation: 'vertical'
+                    size_hint: None, 0.6
+                    width: 60
+                    pos_hint: {'x': 0.15, 'center_y': 0.5}
+                    spacing: 10
+                    
+                    Label:
+                        text: "เอาใจใส่"
+                        font_name: 'assets/fonts/font.ttf'
+                        font_size: '16sp'
+                        size_hint_y: None
+                        height: 30
+                        canvas.before:
+                            Color:
+                                rgba: 0, 0, 0, 0.5
+                            RoundedRectangle:
+                                pos: self.pos
+                                size: self.size
+                                radius: [5,]
+                    VerticalProgressBar:
+                        max: 100
+                        value: root.satisfaction_score
+                        bar_color: 0.8, 0.2, 0.6, 1 # สีชมพู/แดง สำหรับความเอาใจใส่
+
                 # ----------------- หลอดการเจริญเติบโตแนวตั้ง (ขวา) -----------------
                 BoxLayout:
                     id: growth_box
@@ -295,8 +322,8 @@ WindowManager:
                                 radius: [5,]
                     VerticalProgressBar:
                         id: growth_bar
-                        max: 100
-                        value: root.growth_progress
+                        max: root.get_phase_limit()
+                        value: root.growth_score
                         bar_color: 0.2, 0.8, 0.2, 1 # สีเขียวสำหรับต้นไม้
 
                 Label:
@@ -316,23 +343,33 @@ WindowManager:
                             size: self.size
                             radius: [10,]
                 
-                Scatter:
-                    id: flower_scatter
+                RelativeLayout:
                     size_hint: None, None
                     size: 300, 300
-                    # เลี่ยงการใช้ pos_hint เพื่อไม่ให้ FloatLayout เกิด Infinite Loop เมื่อขนาดเปลี่ยน
-                    pos: self.parent.center_x - self.width/2, self.parent.center_y - self.height/2
-                    do_rotation: False
-                    auto_bring_to_front: False
-                    scale_min: 0.5
-                    scale_max: 3.0
-                    
-                    Image:
-                        id: flower_img
-                        source: root.flower_image_source
-                        # เอาขนาดผูกกับ Scatter ตามเดิม ไม่หลุดเฟรม
-                        size: flower_scatter.size
-                        fit_mode: "contain"
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+                    Scatter:
+                        id: flower_scatter
+                        size: 300, 300
+                        pos: 0, 0
+                        do_rotation: False
+                        do_translation: False
+                        auto_bring_to_front: False
+                        scale_min: 0.5
+                        scale_max: 3.0
+                        
+                        Image:
+                            id: aura_glow
+                            source: "assets/images/aura_effect.png"
+                            size: flower_scatter.size
+                            fit_mode: "contain"
+                            opacity: min(root.extra_affection / 100.0, 1.0) if getattr(root, 'current_phase', 1) == 4 else 0
+                            
+                        Image:
+                            id: flower_img
+                            source: root.flower_image_source
+                            size: flower_scatter.size
+                            fit_mode: "contain"
 
                 Label:
                     id: result_lbl
@@ -340,7 +377,7 @@ WindowManager:
                     font_name: 'assets/fonts/font.ttf'
                     font_size: '20sp'
                     size_hint_y: None
-                    height: 40
+                    height: 80
                     size_hint_x: 0.8
                     pos_hint: {'center_x': 0.5, 'y': 0}
                     text_size: self.width, None
@@ -362,10 +399,10 @@ WindowManager:
                 GridLayout:
                     cols: 3
                     size_hint: 1, 1
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.5} if root.growth_progress < 100 else {'top': 2.0}
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5} if root.current_phase < 4 else {'top': 2.0}
                     spacing: 15
-                    opacity: 1 if root.growth_progress < 100 else 0
-                    disabled: root.growth_progress >= 100
+                    opacity: 1 if root.current_phase < 4 else 0
+                    disabled: root.current_phase >= 4
                     
                     Button:
                         text: "รดน้ำ"
@@ -394,7 +431,7 @@ WindowManager:
                         font_size: '20sp'
                         background_normal: '' 
                         background_color: 0.2, 0.7, 0.5, 0.8
-                        on_release: app.next_day()
+                        on_release: root.next_day_action()
                     Button:
                         text: "ออกชั่วคราว"
                         font_name: 'assets/fonts/font.ttf'
@@ -418,11 +455,11 @@ WindowManager:
                     font_name: 'assets/fonts/font.ttf'
                     font_size: '24sp'
                     size_hint: 0.8, 0.8
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.5} if root.growth_progress >= 100 else {'top': 2.0}
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5} if root.current_phase >= 4 else {'top': 2.0}
                     background_normal: '' 
                     background_color: 0.8, 0.6, 0.2, 0.9 # สีทอง
-                    opacity: 1 if root.growth_progress >= 100 else 0
-                    disabled: root.growth_progress < 100
+                    opacity: 1 if root.current_phase >= 4 else 0
+                    disabled: root.current_phase < 4
                     on_release: root.collect_flower()
 
         # Tooltip สำหรับ Hover พลังงาน
@@ -456,7 +493,7 @@ WindowManager:
 
         # 2. พื้นที่สำหรับวางดอกไม้ที่ปลูกสำเร็จ (ใช้สำหรับลากวาง)
         # เราจะสร้าง Widget เปล่าไว้รับการลากวางตรงนี้
-        RelativeLayout:
+        FloatLayout:
             id: garden_area
 
         # 3. แถบเก็บดอกไม้ (Inventory) ด้านล่าง

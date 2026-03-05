@@ -9,7 +9,7 @@ class DraggableFlower(Scatter):
     def __init__(self, flower_type, **kwargs):
         super().__init__(**kwargs)
         self.size_hint = (None, None)
-        self.size = (400, 400)
+        self.size = (200, 200)
         self.do_rotation = False
         img_src = f"assets/images/{flower_type}_4.png"
         if not os.path.exists(img_src): img_src = "assets/images/flower_3.png"
@@ -19,8 +19,8 @@ class InventoryFlower(Image):
     def __init__(self, flower_type, **kwargs):
         super().__init__(**kwargs)
         self.flower_type = flower_type
-        self.size_hint = (None, None)
-        self.size = (200, 200)
+        self.size_hint = (None, 1)
+        self.width = 120
         img_src = f"assets/images/{flower_type}_3.png"
         if not os.path.exists(img_src): img_src = "assets/images/flower_3.png"
         self.source = img_src

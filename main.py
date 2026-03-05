@@ -1,6 +1,13 @@
 import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-os.environ['KIVY_TEXT'] = 'pil'
+os.environ['KIVY_AUDIO'] = 'sdl2'
+
+from kivy.config import Config
+# กำหนดขนาดหน้าต่างให้ชัดเจนเพื่อแก้ ZeroDivisionError ใน Kivy
+Config.set('graphics', 'width', '800')
+Config.set('graphics', 'height', '600')
+Config.set('graphics', 'resizable', '1')
+Config.set('input', 'mouse', 'mouse,multitouch_on_button_middle')
 
 import database
 import random
@@ -54,8 +61,65 @@ class FlowerApp(App):
         })
 
     def build(self):
-        # โหลดไฟล์ garden.kv ตามข้อกำหนด
-        return Builder.load_file('garden.kv')
+        from kivy.uix.label import Label
+        from kivy.uix.screenmanager import Screen
+        from kivy.uix.floatlayout import FloatLayout
+        from kivy.graphics import Color, Rectangle
+        from kivy.core.window import Window
+        
+        # เปลี่ยนสีพื้นหลังหน้าต่าง 
+        Window.clearcolor = (0.1, 0.25, 0.1, 1)
+        
+        self.sm = WindowManager()
+        loading = Screen(name='loading')
+        
+        layout = FloatLayout()
+        
+        # วาดพื้นหลังสีเขียวเข้มให้ Layout นี้
+        with layout.canvas.before:
+            Color(0.1, 0.25, 0.1, 1)
+            self.bg_rect = Rectangle(size=(2000, 2000), pos=(0, 0))
+            
+        def update_rect(instance, value):
+            self.bg_rect.size = instance.size
+            self.bg_rect.pos = instance.pos
+        layout.bind(size=update_rect, pos=update_rect)
+        
+        tips = [
+            "TIP: ดอกไม้แต่ละชนิดชอบสภาพอากาศไม่เหมือนกันนะ",
+            "TIP: ควรดูแลแต้ม 'ความเอาใจใส่' ให้สูงเข้าไว้!",
+            "TIP: ถ้าฝนตกอยู่แล้วก็ไม่เปลี่ยนใจรดน้ำหรอกนะ ต้นไม้จะแฉะ!",
+            "TIP: ระวังอย่าลืมรดน้ำในวันแดดจัดนะ ต้นไม้จะเหี่ยวเฉาได้!"
+        ]
+        chosen_tip = random.choice(tips)
+        
+        lbl = Label(
+            text=f'[b]Loading Dream Garden...[/b]\n\n[color=A5D6A7]{chosen_tip}[/color]', 
+            markup=True,
+            font_name='assets/fonts/font.ttf', 
+            font_size='28sp',
+            halign='center',
+            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+        )
+        layout.add_widget(lbl)
+        loading.add_widget(layout)
+        
+        self.sm.add_widget(loading)
+        return self.sm
+
+    def load_main_ui(self, dt):
+        # โหลดไฟล์ภาพและกราฟิกจาก KV
+        loaded_sm = Builder.load_file('garden.kv')
+        
+        # ดึงหน้าจอที่โหลดเสร็จแล้วมายัดใส่ Manager ตัวหลัก
+        screens = list(loaded_sm.screens)
+        loaded_sm.clear_widgets()
+        for s in screens:
+            self.sm.add_widget(s)
+            
+        # ลบหน้าจอโหลดทิ้ง และเปิดเมนูเกม
+        self.sm.current = 'menu'
+        self.sm.remove_widget(self.sm.get_screen('loading'))
 
     def next_day(self):
         self.stamina = 100
@@ -74,13 +138,21 @@ class FlowerApp(App):
         show_how_to_play_popup()
 
     def on_start(self):
-        # โหลดไฟล์เสียง
-        self.bg_music = SoundLoader.load('assets/sound/soundbg1.mp3')
+        from kivy.clock import Clock
         
-        # ตรวจสอบว่าโหลดไฟล์สำเร็จไหม
+        self.bg_music = None
+        self.click_sound = None
+        
+        # ให้มันโชว์หน้าจอ Loading + ทิปไปสัก 0.5 วินาที ก่อนจะเริ่มโหลดภาพหนักๆ
+        Clock.schedule_once(self.load_main_ui, 0.5)
+        # ส่วนเพลงเล่นช้าไปอีกหน่อย
+        Clock.schedule_once(self.load_sounds, 1.0)
+
+    def load_sounds(self, dt):
+        self.bg_music = SoundLoader.load('assets/sound/soundbg1.mp3')
         if self.bg_music:
-            self.bg_music.loop = True  # สั่งให้เล่นวนลูปไปเรื่อยๆ
-            self.bg_music.volume = 0.3 # ปรับระดับความดัง
+            self.bg_music.loop = True
+            self.bg_music.volume = 0.3
             self.bg_music.play()
         self.click_sound = SoundLoader.load('assets/sound/click.mp3')
 
