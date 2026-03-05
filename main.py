@@ -13,7 +13,7 @@ import database
 import random
 
 from kivy.app import App
-from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition, SlideTransition
 from kivy.lang import Builder
 from kivy.properties import NumericProperty, StringProperty
 from kivy.core.audio import SoundLoader
@@ -118,8 +118,10 @@ class FlowerApp(App):
             self.sm.add_widget(s)
             
         # ลบหน้าจอโหลดทิ้ง และเปิดเมนูเกม
+        self.sm.transition = NoTransition()
         self.sm.current = 'menu'
         self.sm.remove_widget(self.sm.get_screen('loading'))
+        self.sm.transition = SlideTransition()
 
     def next_day(self):
         self.stamina = 100
@@ -143,8 +145,8 @@ class FlowerApp(App):
         self.bg_music = None
         self.click_sound = None
         
-        # ให้มันโชว์หน้าจอ Loading + ทิปไปสัก 0.5 วินาที ก่อนจะเริ่มโหลดภาพหนักๆ
-        Clock.schedule_once(self.load_main_ui, 0.5)
+        # ให้มันโชว์หน้าจอ Loading + ทิปไปสัก 2.5 วินาที ก่อนจะเริ่มโหลดภาพหนักๆ
+        Clock.schedule_once(self.load_main_ui, 2.5)
         # ส่วนเพลงเล่นช้าไปอีกหน่อย
         Clock.schedule_once(self.load_sounds, 1.0)
 
