@@ -20,7 +20,7 @@ class InventoryFlower(Image):
         super().__init__(**kwargs)
         self.flower_type = flower_type
         self.size_hint = (None, None)
-        self.size = (200, 200)
+        self.size = (250, 250)
         img_src = f"assets/images/{flower_type}_3.png"
         if not os.path.exists(img_src): img_src = "assets/images/flower_3.png"
         self.source = img_src
