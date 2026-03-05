@@ -8,15 +8,26 @@ WindowManager:
 
 <MinimalButton@Button>:
     font_name: 'assets/fonts/font.ttf'
-    font_size: '20sp'
+    font_size: '22sp'
+    color: 1, 1, 1, 1
+
     background_normal: ''
-    background_color: 0.2, 0.4, 0.2, 0.7
+    background_down: ''
+    background_color: 0, 0, 0, 0 
+
     canvas.before:
         Color:
-            rgba: 1, 1, 1, 0.1
+            rgba: (0.10, 0.40, 0.15, 0.5) if self.state=='normal' else (0.10, 0.40, 0.15, 0.85)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [18]   # ความมน
+
+        Color:
+            rgba: 0.05, 0.25, 0.10, 1
         Line:
-            width: 1.2
-            rounded_rectangle: (self.x, self.y, self.width, self.height, 10)
+            width: 2
+            rounded_rectangle: (self.x, self.y, self.width, self.height, 18)
 
 <EarthButton@Button>:
     font_name: 'assets/fonts/font.ttf'
@@ -36,7 +47,7 @@ WindowManager:
     name: "menu"
     FloatLayout:
         Image:
-            source: "assets/images/garden.png"
+            source: "assets/images/mainbg.png"
             fit_mode: "fill"
 
         BoxLayout:
@@ -52,49 +63,6 @@ WindowManager:
                 size_hint_y: None
                 height: 80
                 
-                # --- เลเยอร์สีน้ำตาล 4 ทิศ (ทำหน้าที่เป็นขอบหนาๆ) ---
-                # 1. เฉียงซ้ายบน
-                Label:
-                    text: "Apartment Garden"
-                    font_name: 'assets/fonts/titlefont.ttf'
-                    font_size: '48sp'
-                    color: 0.4, 0.2, 0.1, 1
-                    bold: True
-                    pos_hint: {'center_x': 0.495, 'center_y': 0.53}
-                # 2. เฉียงขวาบน
-                Label:
-                    text: "Apartment Garden"
-                    font_name: 'assets/fonts/titlefont.ttf'
-                    font_size: '48sp'
-                    color: 0.4, 0.2, 0.1, 1
-                    bold: True
-                    pos_hint: {'center_x': 0.505, 'center_y': 0.53}
-                # 3. เฉียงซ้ายล่าง
-                Label:
-                    text: "Apartment Garden"
-                    font_name: 'assets/fonts/titlefont.ttf'
-                    font_size: '48sp'
-                    color: 0.4, 0.2, 0.1, 1
-                    bold: True
-                    pos_hint: {'center_x': 0.495, 'center_y': 0.47}
-                # 4. เฉียงขวาล่าง
-                Label:
-                    text: "Apartment Garden"
-                    font_name: 'assets/fonts/titlefont.ttf'
-                    font_size: '48sp'
-                    color: 0.4, 0.2, 0.1, 1
-                    bold: True
-                    pos_hint: {'center_x': 0.505, 'center_y': 0.47}
-
-                # --- เลเยอร์ตัวหนังสือสีขาว (วางทับตรงกลางพอดี) ---
-                Label:
-                    text: "Apartment Garden"
-                    font_name: 'assets/fonts/titlefont.ttf'
-                    font_size: '48sp'
-                    color: 1, 1, 1, 1
-                    bold: True
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-            # -----------------------------------------------
 
             Widget: 
                 size_hint_y: 0.3
