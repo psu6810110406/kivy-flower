@@ -5,6 +5,7 @@ WindowManager:
     LevelScreen:
     GameScreen:
     CollectionScreen:
+    SettingsScreen:
 
 <MinimalButton@Button>:
     font_name: 'assets/fonts/font.ttf'
@@ -52,41 +53,42 @@ WindowManager:
 
         BoxLayout:
             orientation: 'vertical'
-            padding: [40, 100, 40, 40]
+            padding: [40, 220, 40, 50]
             spacing: 20
-            size_hint: 0.8, 0.9
+            size_hint: 0.7, 1.0
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
-            # --- ลบ Label ตัวเก่าออก แล้วใส่ FloatLayout นี้แทน ---
-            # --- เปลี่ยน FloatLayout เป็นแบบนี้ครับ ---
-            FloatLayout:
-                size_hint_y: None
-                height: 80
-                
-
             Widget: 
-                size_hint_y: 0.3
+                size_hint_y: 1.0
 
             MinimalButton:
                 text: "Start Journey"
                 size_hint_y: None
-                height: 80
+                height: 50
                 on_release: app.root.current = "levels"
                 on_press: app.play_click()
             
             MinimalButton:
                 text: "My Collection"
                 size_hint_y: None
-                height: 80
+                height: 50
                 on_release: app.root.current = "collection"
                 on_press: app.play_click()
                 
             MinimalButton:
                 text: "How to Play"
                 size_hint_y: None
-                height: 80
+                height: 50
                 on_release: app.show_how_to_play()
                 on_press: app.play_click()
+
+            MinimalButton:
+                text: "Settings"
+                size_hint_y: None
+                height: 50
+                on_release: app.root.current = "settings"
+                on_press: app.play_click()
+
 
 # ----------------- หน้า 2: เลือกด่าน (เรือนกระจก) -----------------
 <LevelScreen>:
@@ -202,7 +204,7 @@ WindowManager:
             rgba: self.bar_color
         RoundedRectangle:
             pos: self.pos
-            size: self.width, self.height * (self.value / float(self.max)) if self.max else 0
+            size: self.width, self.height * min(1.0, (self.value / float(self.max))) if self.max else 0
             radius: [10,]
 
 # ----------------- หน้า 3: เล่นเกม (แบบใหม่) -----------------
@@ -322,7 +324,7 @@ WindowManager:
                                 radius: [5,]
                     VerticalProgressBar:
                         id: growth_bar
-                        max: root.get_phase_limit()
+                        max: root.phase_limit
                         value: root.growth_score
                         bar_color: 0.2, 0.8, 0.2, 1 # สีเขียวสำหรับต้นไม้
 
@@ -486,7 +488,7 @@ WindowManager:
     FloatLayout:
         # 1. ฉากหลังสวนดอกไม้ที่สวยงาม
         Image:
-            source: "assets/images/garden.png"  # ภาพสวนที่มีดอกไม้เต็ม
+            source: "assets/images/Colletion_Home_page.png"  # ภาพสวนที่มีดอกไม้เต็ม
             fit_mode: "cover"
             size_hint: 1, 1
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
@@ -517,7 +519,6 @@ WindowManager:
                     padding: 10
                     spacing: 10
 
-        # 4. ปุ่มกลับ
         Button:
             text: "Back"
             font_name: 'assets/fonts/font.ttf'
@@ -525,3 +526,61 @@ WindowManager:
             pos_hint: {'right': 0.98, 'top': 0.98}
             on_release: app.root.current = "menu"
             on_press: app.play_click()
+
+# ----------------- หน้า 5: ตั้งค่า (Settings) -----------------
+<SettingsScreen>:
+    name: "settings"
+    FloatLayout:
+        Image:
+            source: "assets/images/mainbg.png"
+            fit_mode: "fill"
+            
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 40
+            spacing: 20
+            size_hint: 0.8, 0.6
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 0.7
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [20]
+                    
+            Label:
+                text: "ตั้งค่า (Settings)"
+                font_name: 'assets/fonts/font.ttf'
+                font_size: '36sp'
+                size_hint_y: None
+                height: 60
+                
+            Label:
+                text: f"ระดับเสียงพืื้นหลัง: {int(master_volume.value * 100)}%"
+                font_name: 'assets/fonts/font.ttf'
+                font_size: '22sp'
+                size_hint_y: None
+                height: 40
+                
+            Slider:
+                id: master_volume
+                min: 0.0
+                max: 1.0
+                value: app.music_volume
+                size_hint_y: None
+                height: 50
+                on_value: root.on_volume_change(*args)
+                
+            Widget:
+                size_hint_y: 1
+                
+            MinimalButton:
+                text: "Back to Menu"
+                size_hint_y: None
+                height: 70
+                size_hint_x: 0.6
+                pos_hint: {'center_x': 0.5}
+                on_release: app.root.current = "menu"
+                on_press: app.play_click()

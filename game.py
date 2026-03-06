@@ -15,6 +15,8 @@ class GameScreen(Screen):
     current_phase = NumericProperty(1)
     care_days = NumericProperty(0)
     flower_image_source = StringProperty('')
+    phase_limit = NumericProperty(100)
+    
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -31,16 +33,20 @@ class GameScreen(Screen):
         # ถ่ายทอดตำแหน่งเมาส์ในหน้าต่างไปยัง Widget เพื่อเช็คแรงเงา
         stamina_box = self.ids.stamina_box
         growth_box = self.ids.get('growth_box')
-        # แปลงพิกัด mouse เป็นพิกัดของ stamina_box (ถ้ามันถูกครอบด้วย layout อื่น)
-        # เนื่องจากกล่องพิกัดอาจคาดเคลื่อน ให้หาว่าพิกัดนั้นชนกับ Bounding box ของ widget หรือไม่
+        care_box = self.ids.get('care_box')
+
         if stamina_box.collide_point(*pos):
             self.ids.tooltip_lbl.opacity = 1
             self.ids.tooltip_lbl.pos = (pos[0] + 15, pos[1] + 15)
             self.ids.tooltip_lbl.text = f"พลังงานเหลือ: {App.get_running_app().stamina} / 100"
+        elif care_box and care_box.collide_point(*pos):
+            self.ids.tooltip_lbl.opacity = 1
+            self.ids.tooltip_lbl.pos = (pos[0] + 15, pos[1] + 15)
+            self.ids.tooltip_lbl.text = f"ความเอาใจใส่: {self.satisfaction_score} / 100"
         elif growth_box and growth_box.collide_point(*pos):
             self.ids.tooltip_lbl.opacity = 1
             self.ids.tooltip_lbl.pos = (pos[0] - self.ids.tooltip_lbl.width - 15, pos[1] + 15)
-            self.ids.tooltip_lbl.text = f"ความเติบโต: {self.growth_score:.1f} / {self.get_phase_limit()}\nความเอาใจใส่: {self.satisfaction_score}"
+            self.ids.tooltip_lbl.text = f"ความเติบโต: {self.growth_score:.1f} / {self.phase_limit}"
         else:
             self.ids.tooltip_lbl.opacity = 0
 
@@ -67,6 +73,8 @@ class GameScreen(Screen):
                 self.current_phase = progress_data.get("current_phase", 1)
                 self.care_days = progress_data.get("care_days", 0)
 
+            self.phase_limit = self.get_phase_limit()
+            
             self.ids.result_lbl.text = "กลับมาดูแลต่อแล้ว!"
             self.ids.flower_scatter.scale = 1.0
         else:
@@ -78,6 +86,7 @@ class GameScreen(Screen):
         self.growth_score = 0
         self.satisfaction_score = 100
         self.care_days = 0
+        self.phase_limit = self.get_phase_limit()
         self.flower_image_source = self.get_flower_image(0)
         self.ids.result_lbl.text = "เริ่มปลูกต้นไม้กันเลย!"
         self.ids.flower_scatter.scale = 1.0
@@ -111,6 +120,7 @@ class GameScreen(Screen):
 
     def on_phase_change(self, instance, value):
         self.flower_image_source = self.get_flower_image(value - 1)
+        self.phase_limit = self.get_phase_limit()
 
     def get_phase_limit(self):
         limits = {1: 100, 2: 250, 3: 400, 4: 9999}

@@ -7,7 +7,7 @@ from kivy.config import Config
 Config.set('graphics', 'width', '800')
 Config.set('graphics', 'height', '600')
 Config.set('graphics', 'resizable', '1')
-Config.set('input', 'mouse', 'mouse,multitouch_on_button_middle')
+Config.set('input', 'mouse', 'mouse,disable_multitouch')
 
 import database
 import random
@@ -22,12 +22,14 @@ from kivy.core.audio import SoundLoader
 from collection import CollectionScreen
 from game import LevelScreen, GameScreen
 from how_to_play import show_how_to_play_popup
+from settings_screen import SettingsScreen
 
 # เพื่อให้ Kivy ค้นหาคลาสเหล่านี้เจอเมื่อโหลดไฟล์ .kv
 from kivy.factory import Factory
 Factory.register('LevelScreen', cls=LevelScreen)
 Factory.register('GameScreen', cls=GameScreen)
 Factory.register('CollectionScreen', cls=CollectionScreen)
+Factory.register('SettingsScreen', cls=SettingsScreen)
 
 class MenuScreen(Screen):
     pass
@@ -40,6 +42,7 @@ class WindowManager(ScreenManager):
 class FlowerApp(App):
     stamina = NumericProperty(100)
     weather = StringProperty("แดดจัด")
+    music_volume = NumericProperty(0.3)
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -51,14 +54,21 @@ class FlowerApp(App):
         self.flower_progress = data.get("flower_progress", {})
         self.stamina = data.get("stamina", 100)
         self.weather = data.get("weather", "แดดจัด")
+        self.music_volume = data.get("music_volume", 0.3)
 
     def save_app_state(self):
         database.save_data({
             "unlocked_flowers": self.unlocked_flowers,
             "flower_progress": self.flower_progress,
             "stamina": self.stamina,
-            "weather": self.weather
+            "weather": self.weather,
+            "music_volume": float(self.music_volume)
         })
+
+    def set_volume(self, value):
+        self.music_volume = value
+        if getattr(self, 'bg_music', None) and self.bg_music:
+            self.bg_music.volume = value
 
     def build(self):
         from kivy.uix.label import Label
@@ -146,7 +156,7 @@ class FlowerApp(App):
         self.click_sound = None
         
         # ให้มันโชว์หน้าจอ Loading + ทิปไปสัก 2.5 วินาที ก่อนจะเริ่มโหลดภาพหนักๆ
-        Clock.schedule_once(self.load_main_ui, 2.5)
+        Clock.schedule_once(self.load_main_ui, 1.0)
         # ส่วนเพลงเล่นช้าไปอีกหน่อย
         Clock.schedule_once(self.load_sounds, 1.0)
 
@@ -154,7 +164,7 @@ class FlowerApp(App):
         self.bg_music = SoundLoader.load('assets/sound/soundbg1.mp3')
         if self.bg_music:
             self.bg_music.loop = True
-            self.bg_music.volume = 0.3
+            self.bg_music.volume = self.music_volume
             self.bg_music.play()
         self.click_sound = SoundLoader.load('assets/sound/click.mp3')
 
