@@ -2,6 +2,7 @@
     "unlocked_flowers": [],
 <<<<<<< Updated upstream
     "flower_progress": {},
+<<<<<<< HEAD
     "stamina": 120,
     "weather": "แดดจัด"
 =======
@@ -16,4 +17,8 @@
     "stamina": 60,
     "weather": "พายุเข้า"
 >>>>>>> Stashed changes
+=======
+    "stamina": 40,
+    "weather": "พายุเข้า"
+>>>>>>> f2c4c03eb3df235f451f4c87f4a493e9aaa5aae5
 }

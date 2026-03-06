@@ -5,6 +5,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.properties import NumericProperty, StringProperty
 from kivy.animation import Animation
 from kivy.core.window import Window
+from kivy.core.audio import SoundLoader
 
 class LevelScreen(Screen):
     pass
