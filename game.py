@@ -5,8 +5,12 @@ from kivy.uix.screenmanager import Screen
 from kivy.properties import NumericProperty, StringProperty
 from kivy.animation import Animation
 from kivy.core.window import Window
-#from kivy.core.audio import SoundLoader
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import NumericProperty
+#from kivy.core.audio import SoundLoader
 
 class LevelScreen(Screen):
     pass
@@ -244,7 +248,43 @@ class GameScreen(Screen):
             if self.current_flower in app.flower_progress:
                 del app.flower_progress[self.current_flower]
             app.save_app_state()
-            print("You won!")
+            print("You won!")   
+
+    def show_death_popup(self):
+        layout = BoxLayout(orientation='vertical', padding=20, spacing=10)
+        
+        # ข้อความแจ้งเตือน
+        message = Label(
+            text="[color=ff4444]🥀 ดอกไม้ของคุณตายแล้ว[/color]\n\nเนื่องจากขาดการเอาใจใส่จนพลังชีวิตหมดลง",
+            markup=True,
+            font_name='assets/fonts/font.ttf',
+            halign='center'
+        )
+        
+        # ปุ่มกลับหน้าหลัก
+        btn = Button(
+            text="กลับไปเริ่มใหม่",
+            size_hint=(1, 0.3),
+            background_color=(0.8, 0.3, 0.3, 1)
+        )
+        
+        layout.add_widget(message)
+        layout.add_widget(btn)
+
+        popup = Popup(
+            title="Game Over",
+            content=layout,
+            size_hint=(0.8, 0.4),
+            auto_dismiss=False
+        )
+        
+        # เมื่อกดปุ่มให้ปิด Popup และเปลี่ยนหน้า
+        btn.bind(on_release=lambda x: self.reset_and_exit(popup))
+        popup.open()
+
+    def reset_and_exit(self, popup):
+        popup.dismiss()
+        self.manager.current = "menu" # หรือ "levels" เพื่อเลือกปลูกใหม่
 
     def give_up(self):
         self.reset_game()
