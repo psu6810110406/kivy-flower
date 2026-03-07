@@ -5,7 +5,8 @@ from kivy.uix.screenmanager import Screen
 from kivy.properties import NumericProperty, StringProperty
 from kivy.animation import Animation
 from kivy.core.window import Window
-from kivy.core.audio import SoundLoader
+#from kivy.core.audio import SoundLoader
+from kivy.properties import NumericProperty
 
 class LevelScreen(Screen):
     pass
@@ -17,6 +18,8 @@ class GameScreen(Screen):
     care_days = NumericProperty(0)
     flower_image_source = StringProperty('')
     phase_limit = NumericProperty(100)
+    satisfaction_score = NumericProperty(100)
+    health_score = NumericProperty(100)
     
     
     def __init__(self, **kwargs):
@@ -111,8 +114,7 @@ class GameScreen(Screen):
             return "assets/images/sprout.png"
             
         path = f"assets/images/{self.current_flower}_{state}.png"
-        
-        # เพิ่ม 2 บรรทัดนี้เพื่อเช็คตำแหน่งที่ Python มองหาไฟล์
+
         import os
         
         if os.path.exists(path):
@@ -198,6 +200,23 @@ class GameScreen(Screen):
             app.save_app_state()
         else:
             self.update_status("พลังงานไม่พอ! กดยอมพักผ่อนได้แล้ว")
+
+    def apply_penalty(self):
+        # โลจิก: ถ้าความเอาใจใส่หมด ให้ไปหักพลังชีวิตแทน
+        if self.satisfaction_score <= 0:
+            penalty = 20 # หักพลังชีวิตครั้งละ 20
+            self.health_score = max(0, self.health_score - penalty)
+            self.result_lbl.text = f"ดอกไม้ขาดการดูแล! พลังชีวิตลดลง {penalty}%"
+            
+            # เช็คเงื่อนไขความตาย
+            if self.health_score <= 0:
+                self.trigger_death()
+
+    def trigger_death(self):
+        # แจ้งเตือนเมื่อดอกไม้ตาย
+        self.result_lbl.text = "เสียใจด้วย... ดอกไม้ของคุณตายแล้ว"
+        # อาจจะเพิ่ม Popup หรือส่งกลับหน้าหลัก
+        self.show_death_popup()
 
     def update_status(self, msg):
         self.ids.result_lbl.text = msg
