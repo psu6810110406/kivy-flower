@@ -352,7 +352,7 @@ WindowManager:
                 source: "assets/images/aura_effect.png"
                 size_hint: None, None
                 size: 380, 380
-                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                pos_hint: {'center_x': 0.5, 'center_y': 0.45}
                 opacity: min(max(0, root.satisfaction_score - 100) / 100.0, 1.0)
                 canvas.before:
                     PushMatrix
