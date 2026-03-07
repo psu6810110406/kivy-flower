@@ -124,7 +124,7 @@ WindowManager:
     FloatLayout:
         # พื้นหลังเรือนกระจก / ระเบียงต้นไม้
         Image:
-            source: "assets/images/garden_page.png" 
+            source: "assets/images/selectbg.png" 
             fit_mode: "fill"
 
         # เลเยอร์สีจางๆ เพื่อให้อ่านตัวหนังสือและเห็นปุ่มชัดขึ้น
@@ -258,13 +258,13 @@ WindowManager:
     name: "game"
     FloatLayout:
         Image:
-            source: "assets/images/garden_page.png"
+            source: "assets/images/gamebg.png"
             fit_mode: "fill"
 
         # 2. พื้นที่ดอกไม้ (ย้ายมาไว้ด้านบนสุดของโค้ดเพื่อไม่ให้บังปุ่ม)
         RelativeLayout:
             size_hint: None, None
-            size: 400, 400
+            size: 600, 600
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
             # ป้ายชื่อ (ลอยอยู่เหนือหัวดอกไม้)
@@ -488,7 +488,7 @@ WindowManager:
     name: "settings"
     FloatLayout:
         Image:
-            source: "assets/images/mainbg.png"
+            source: "assets/images/settingbg.png"
             fit_mode: "fill"
             
         BoxLayout:
