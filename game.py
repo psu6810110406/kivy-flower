@@ -139,6 +139,7 @@ class GameScreen(Screen):
 
     # Action Callbacks ตอบสนองต่อปุ่ม
     def water_plant(self):
+        print("Action: water_plant called")
         app = App.get_running_app()
         if self.current_phase >= 4 and self.satisfaction_score >= 100:
             self.satisfaction_score += 10
@@ -171,6 +172,7 @@ class GameScreen(Screen):
             self.update_status("พลังงานไม่พอ! กดยอมพักผ่อนได้แล้ว")
 
     def fertilize_plant(self):
+        print("Action: fertilize_plant called")
         app = App.get_running_app()
         if self.current_phase >= 4: return
         if app.stamina >= 20:
@@ -184,6 +186,7 @@ class GameScreen(Screen):
             self.update_status("พลังงานไม่พอ! กดยอมพักผ่อนได้แล้ว")
 
     def till_soil(self):
+        print("Action: till_soil called")
         app = App.get_running_app()
         if self.current_phase >= 4: return
         if app.stamina >= 15:

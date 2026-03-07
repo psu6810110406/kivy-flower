@@ -9,6 +9,21 @@ Config.set('graphics', 'height', '600')
 Config.set('graphics', 'resizable', '1')
 Config.set('input', 'mouse', 'mouse,disable_multitouch')
 
+from kivy.uix.button import Button
+from kivy.uix.boxlayout import BoxLayout
+from kivy.properties import ColorProperty, StringProperty, NumericProperty
+
+# --- Custom UI components defined in Python for better property support ---
+class MinimalButton(Button):
+    # Custom property to store the intended color
+    btn_color = ColorProperty([0.1, 0.4, 0.15, 1])
+
+class StatusGauge(BoxLayout):
+    label_text = StringProperty("")
+    val = NumericProperty(0)
+    max_v = NumericProperty(100)
+    color = ColorProperty([1, 1, 1, 1])
+
 import database
 import random
 
@@ -30,6 +45,8 @@ Factory.register('LevelScreen', cls=LevelScreen)
 Factory.register('GameScreen', cls=GameScreen)
 Factory.register('CollectionScreen', cls=CollectionScreen)
 Factory.register('SettingsScreen', cls=SettingsScreen)
+Factory.register('MinimalButton', cls=MinimalButton)
+Factory.register('StatusGauge', cls=StatusGauge)
 
 class MenuScreen(Screen):
     pass
