@@ -43,6 +43,34 @@ WindowManager:
     canvas.after:
         PopMatrix
 
+<DeathPopupContent@BoxLayout>:
+    orientation: 'vertical'
+    padding: 20
+    spacing: 15
+    canvas.before:
+        Color:
+            rgba: 0.96, 0.94, 0.88, 1 # สีครีมมินิมอล
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [20]
+    Label:
+        text: "GAME OVER"
+        font_name: 'assets/fonts/font.ttf'
+        font_size: '30sp'
+        color: 0.8, 0.2, 0.2, 1
+    Label:
+        text: "[color=ff4444]🥀 ดอกไม้ของคุณตายแล้ว[/color]\n\nเนื่องจากขาดการเอาใจใส่จนพลังชีวิตหมดลง"
+        markup: True
+        font_name: 'assets/fonts/font.ttf'
+        halign: 'center'
+    Button:
+        text: "กลับไปเริ่มใหม่"
+        size_hint: (1, 0.3)
+        background_color: (0.8, 0.3, 0.3, 1)
+        font_name: 'assets/fonts/font.ttf'
+        font_size: '20sp'
+
 # ----------------- หน้า 1: เมนูหลัก -----------------
 <MenuScreen>:
     name: "menu"

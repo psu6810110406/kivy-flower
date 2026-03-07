@@ -6,6 +6,7 @@ from kivy.properties import NumericProperty, StringProperty
 from kivy.animation import Animation
 from kivy.core.window import Window
 from kivy.uix.popup import Popup
+from kivy.factory import Factory
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
@@ -217,10 +218,53 @@ class GameScreen(Screen):
                 self.trigger_death()
 
     def trigger_death(self):
-        # แจ้งเตือนเมื่อดอกไม้ตาย
         self.result_lbl.text = "เสียใจด้วย... ดอกไม้ของคุณตายแล้ว"
-        # อาจจะเพิ่ม Popup หรือส่งกลับหน้าหลัก
-        self.show_death_popup()
+        self.show_death_alert() # เรียกชื่อให้ตรงกับข้างล่าง
+
+    def show_death_alert(self):
+        # 1. ดึงเนื้อหาจาก KV มา
+        content = Factory.DeathPopupContent()
+        
+        # 2. สร้างปุ่ม Reset/กลับหน้าหลัก ด้วย Python
+        reset_btn = Button(
+            text="กลับไปเริ่มใหม่",
+            size_hint=(1, 0.4),
+            background_color=(0.8, 0.3, 0.3, 1), # สีแดงนวลๆ
+            font_name='assets/fonts/font.ttf'
+        )
+        
+        # 3. สร้างตัวแปร popup ไว้ก่อนเพื่อให้ปุ่มเรียกใช้งานได้
+        popup = Popup(
+            title="GAME OVER", 
+            content=content,
+            size_hint=(0.8, 0.5),
+            auto_dismiss=False,
+            separator_height=0
+        )
+
+        # 4. กำหนดการทำงานให้ปุ่ม (ปิด Popup และรีเซ็ตค่า)
+        reset_btn.bind(on_release=lambda x: self.reset_game_logic(popup))
+        
+        # 5. ใส่ปุ่มลงไปใน content (BoxLayout จาก KV)
+        content.add_widget(reset_btn)
+        
+        popup.open()
+
+    def reset_game_logic(self, popup):
+        popup.dismiss()
+        
+        # รีเซ็ตค่าตัวแปรต่างๆ กลับเป็นค่าเริ่มต้น
+        self.health_score = 100
+        self.satisfaction_score = 100
+        self.growth_score = 0
+        self.current_phase = 1
+        
+        # ส่งผู้เล่นกลับไปหน้าเมนูหรือหน้าเลือกเลเวล
+        self.manager.current = 'menu'
+        
+        # บันทึกสถานะที่รีเซ็ตแล้วลงไฟล์
+        app = App.get_running_app()
+        app.save_app_state()
 
     def update_status(self, msg):
         self.ids.result_lbl.text = msg
