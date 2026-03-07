@@ -631,16 +631,36 @@ WindowManager:
             BoxLayout:
                 orientation: 'horizontal'
                 size_hint_y: None
-                height: 100
+                height: 70  
                 spacing: 15
                 
                 Button:
                     size_hint_x: None
-                    width: 100
-                    # ดึงรูปมาจากตัวแปร speaker_icon ในไฟล์ python
-                    background_normal: root.speaker_icon
-                    background_down: root.speaker_icon
-                    # ส่ง id ของหลอดเสียงไปให้ฟังก์ชันทำงาน
+                    width: 70  
+                    
+                    # 1. ล้างค่าพื้นหลังปุ่มเดิมของ Kivy ให้โปร่งใส
+                    background_normal: ''
+                    background_down: ''
+                    background_color: 0, 0, 0, 0 
+                    
+                    # 2. วาดกราฟิกของเราเอง
+                    canvas.before:
+                        # --- ชั้นที่ 1: วาดวงกลมสีขาว ---
+                        Color:
+                            rgba: 1, 1, 1, 1  # สีขาว
+                        Ellipse:
+                            pos: self.pos
+                            size: self.size
+                            
+                        # --- ชั้นที่ 2: รูปลำโพง (วางทับวงกลม) ---
+                        Color:
+                            rgba: 1, 1, 1, 1  # สีรูปปกติ
+                        Rectangle:
+                            # ปรับขยับรูปเข้ามาตรงกลาง (Padding) จะได้ไม่ชนขอบวงกลม
+                            pos: self.x + 12, self.y + 12 
+                            size: self.width - 24, self.height - 24
+                            source: root.speaker_icon
+                            
                     on_release: root.toggle_mute(master_volume)
                     
                 Slider:
@@ -648,7 +668,6 @@ WindowManager:
                     min: 0.0
                     max: 1.0
                     value: app.music_volume
-                    # เปลี่ยนจาก *args เป็น (self, self.value) ให้ตรงกับฟังก์ชันใน python
                     on_value: root.on_volume_change(self, self.value)
             # ---> จบส่วนที่ปรับแก้ <---
                     
