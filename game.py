@@ -41,6 +41,7 @@ class GameScreen(Screen):
         if not self.parent or self.parent.current != self.name:
             return
         
+        app = App.get_running_app()
         # แปลงพิกัดจากหน้าต่างเป็นพิกัด Widget
         local_pos = self.to_widget(*pos)
         
@@ -48,23 +49,40 @@ class GameScreen(Screen):
         growth_box = self.ids.get('growth_box')
         care_box = self.ids.get('care_box')
         health_box = self.ids.get('health_box')
+        day_lbl = self.ids.get('day_lbl')
+
+        found_widget = None
+        tooltip_text = ""
 
         if stamina_box.collide_point(*local_pos):
-            self.ids.tooltip_lbl.opacity = 1
-            self.ids.tooltip_lbl.pos = (pos[0] + 15, pos[1] + 15)
-            self.ids.tooltip_lbl.text = f"พลังงานเหลือ: {App.get_running_app().stamina} / 100"
+            found_widget = stamina_box
+            tooltip_text = f"พลังงานเหลือ: {int(app.stamina)} / 100"
         elif care_box and care_box.collide_point(*local_pos):
-            self.ids.tooltip_lbl.opacity = 1
-            self.ids.tooltip_lbl.pos = (pos[0] + 15, pos[1] + 15)
-            self.ids.tooltip_lbl.text = f"ความเอาใจใส่: {int(self.satisfaction_score)} / 100"
+            found_widget = care_box
+            tooltip_text = f"ความเอาใจใส่: {int(self.satisfaction_score)} / {int(self.phase_limit)}"
         elif growth_box and growth_box.collide_point(*local_pos):
-            self.ids.tooltip_lbl.opacity = 1
-            self.ids.tooltip_lbl.pos = (pos[0] - self.ids.tooltip_lbl.width - 15, pos[1] + 15)
-            self.ids.tooltip_lbl.text = f"ความเติบโต: {self.growth_score:.1f} / {self.phase_limit}"
+            found_widget = growth_box
+            tooltip_text = f"ความเติบโต: {self.growth_score:.1f} / {self.phase_limit}"
         elif health_box and health_box.collide_point(*local_pos):
-            self.ids.tooltip_lbl.opacity = 1
-            self.ids.tooltip_lbl.pos = (pos[0] + 15, pos[1] + 15)
-            self.ids.tooltip_lbl.text = f"พลังชีวิต: {int(self.health_score)} / 100"
+            found_widget = health_box
+            tooltip_text = f"พลังชีวิต: {int(self.health_score)} / 100"
+        elif day_lbl and day_lbl.collide_point(*local_pos):
+            found_widget = day_lbl
+            tooltip_text = f"วันที่ดูแลสะสมมาทั้งหมด: {self.care_days + 1} วัน"
+
+        if found_widget:
+            lbl = self.ids.tooltip_lbl
+            lbl.text = tooltip_text
+            lbl.texture_update() # บังคับอัปเดตขนาดตัวอักษรทันทีเพื่อคำนวณตำแหน่งที่ถูกต้อง
+            
+            # คำนวณทิศทาง tooltip ตามตำแหน่งหน้าจอ (ซ้ายดีดขวา ขวาดีดซ้าย)
+            if pos[0] < window.width / 2:
+                x_off = 15
+            else:
+                x_off = -lbl.width - 15
+                
+            lbl.pos = (pos[0] + x_off, pos[1] + 15)
+            lbl.opacity = 1
         else:
             self.ids.tooltip_lbl.opacity = 0
 
@@ -196,7 +214,7 @@ class GameScreen(Screen):
             anim = Animation(scale=sc.scale * 1.2, duration=0.1) + Animation(scale=sc.scale, duration=0.1)
             anim.start(sc)
             
-            self.check_phase_up()
+            # check_phase_up() ถูกเรียกอัตโนมัติผ่าน on_growth_score / on_satisfaction_score
             app.save_app_state()
         else:
             self.update_status("พลังงานไม่พอ! กดยอมพักผ่อนได้แล้ว")
@@ -211,7 +229,7 @@ class GameScreen(Screen):
             self.growth_score += 30
             self.satisfaction_score += 15
             self.update_status("ใส่ปุ๋ยบำรุงขั้นสุด! (+30 เติบโต | +15 เอาใจใส่ | -20 พลังงาน)")
-            self.check_phase_up()
+            # check_phase_up() ถูกเรียกอัตโนมัติผ่าน on_growth_score / on_satisfaction_score
             app.save_app_state()
         else:
             self.update_status("พลังงานไม่พอ! กดยอมพักผ่อนได้แล้ว")
@@ -226,10 +244,16 @@ class GameScreen(Screen):
             self.growth_score += 20
             self.satisfaction_score += 10
             self.update_status("พรวนดินร่วนซุยดีมาก (+20 เติบโต | +10 เอาใจใส่ | -15 พลังงาน)")
-            self.check_phase_up()
+            # check_phase_up() ถูกเรียกอัตโนมัติผ่าน on_growth_score / on_satisfaction_score
             app.save_app_state()
         else:
             self.update_status("พลังงานไม่พอ! กดยอมพักผ่อนได้แล้ว")
+
+    def on_growth_score(self, instance, value):
+        self.check_phase_up()
+
+    def on_satisfaction_score(self, instance, value):
+        self.check_phase_up()
 
     def apply_penalty(self):
         # โลจิก: ถ้าความเอาใจใส่หมด ให้ไปหักพลังชีวิตแทน
@@ -293,14 +317,18 @@ class GameScreen(Screen):
 
     def check_phase_up(self):
         limit = self.get_phase_limit()
-        if self.current_phase < 4 and self.growth_score >= limit:
+        # เช็คทั้งความเจริญเติบโต และ ความเอาใจใส่ (ตามความต้องการที่ว่าถ้าเกิน 100/ขีดจำกัด ให้เลด้าขึ้นเฟสถัดไป)
+        if self.current_phase < 4 and (self.growth_score >= limit or self.satisfaction_score >= limit):
             self.current_phase += 1
-            self.growth_score = 0 # รีเซ็ตแต้ม
+            self.growth_score = 0 # รีเซ็ตแต้มเติบโด
+            self.satisfaction_score = 100 # รีเซ็ตความเอาใจใส่กลับมาเริ่มต้นที่ความสดใส (หรือค่าเริ่มต้น)
+            
             if self.current_phase == 4:
                 self.update_status("ยินดีด้วย! ดอกไม้บานเต็มที่แล้ว มีออร่าพุ่งขึ้นมา! เก็บเกี่ยวได้เลย!")
             else:
                 self.update_status(f"เติบโตขึ้นเข้าสู่เฟสที่ {self.current_phase} แล้ว!")
             app = App.get_running_app()
+            app.save_app_state()
 
     def collect_flower(self):
         if self.current_phase >= 4:

@@ -329,6 +329,7 @@ WindowManager:
 
         # ป้ายบอกวันที่ (Day Counter) อยู่มุมขวาบน
         Label:
+            id: day_lbl
             text: f"วันที่: {root.care_days + 1}"
             font_name: 'assets/fonts/font.ttf'
             font_size: '20sp'
@@ -359,7 +360,7 @@ WindowManager:
                 RoundedRectangle:
                     pos: self.pos
                     size: self.size
-                    radius: [15,]
+                    radius: [15]
 
             # หลอดพลังงาน (Stamina)
             StatusGauge:
@@ -373,6 +374,7 @@ WindowManager:
                 id: care_box
                 label_text: "ความเอาใจใส่"
                 val: root.satisfaction_score
+                max_v: root.phase_limit # ใช้ระบบเฟสเดียวกับ Growth
                 color: 0.8, 0.2, 0.6, 1
 
             # หลอดเติบโต (Growth)
