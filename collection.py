@@ -23,34 +23,40 @@ BUFFS = [
 ]
 
 class DraggableFlower(Scatter):
-    def __init__(self, flower_type, **kwargs):
+    def __init__(self, flower_data, **kwargs):
         super().__init__(**kwargs)
-        self.flower_type = flower_type
+        # flower_data: {"type": "rose", "care_days": 5, "extra_affection": 120}
+        if isinstance(flower_data, str):
+            self.flower_info = {"type": flower_data, "care_days": 0, "extra_affection": 0}
+        else:
+            self.flower_info = flower_data
+            
+        self.flower_type = self.flower_info["type"]
         self.size_hint = (None, None)
         self.size = (300, 300)
         self.do_rotation = False
-        img_src = f"assets/images/{flower_type}_4.png"
-        if not os.path.exists(img_src): img_src = f"assets/images/{flower_type}_4.PNG"
+        
+        img_src = f"assets/images/{self.flower_type}_4.png"
+        if not os.path.exists(img_src): img_src = f"assets/images/{self.flower_type}_4.PNG"
         if not os.path.exists(img_src): img_src = "assets/images/flower_3.png"
         
-        self.aura_image = Image(source="assets/images/aura_effect.png", size=self.size, opacity=0)
+        # 1.2 แก้ให้โหลดออร่าขึ้นมาเลยตามที่เล่นได้
+        # ระดับออร่าคำนวณจาก extra_affection
+        aura_opacity = min(self.flower_info.get("extra_affection", 0) / 100.0, 1.0)
+        self.aura_image = Image(source="assets/images/aura_effect.png", size=self.size, opacity=aura_opacity)
         self.add_widget(self.aura_image)
 
         self.flower_image = Image(source=img_src, size=self.size)
         self.add_widget(self.flower_image)
         
         self.stored_time = time.time()
-        self.stats = {"Water": random.randint(50, 100), "Health": random.randint(50, 100), "Care": random.randint(50, 100)}
-        self.active_buffs = random.sample(BUFFS, k=3)
-        if "10% flower enlargement buff" not in self.active_buffs:
-            self.active_buffs[0] = "10% flower enlargement buff"
-        if "Special aura" not in self.active_buffs:
-            self.active_buffs[1] = "Special aura"
-            
-        self.hover_count = 0
-        self.driving_effect_activated = False
-        self.hovered = False
         
+        # คำนวณมูลค่า (50G + โบนัสจากออร่า)
+        # เนื่องจากเฟส 4 คือคูณ 4 ถ้าตามตรรกะคือ เฟส 2คูณ2 3คูณ3 4คูณ4
+        # สูตร: 50 + (extra_affection * 4) 
+        self.value = 50 + int(self.flower_info.get("extra_affection", 0) * 4)
+            
+        self.hovered = False
         Window.bind(mouse_pos=self.on_mouse_pos)
         
     def on_mouse_pos(self, window, pos):
@@ -64,20 +70,25 @@ class DraggableFlower(Scatter):
         if self.collide_point(*pos):
             if not self.hovered:
                 self.hovered = True
-                self.hover_count += 1
-                
                 screen = app.root.get_screen('collection')
-                duration = int(time.time() - self.stored_time)
-                text = f"Stored: {duration}s\nStats: W:{self.stats['Water']} H:{self.stats['Health']}\nHover count: {self.hover_count}"
+                
+                # 1.3 แสดงข้อมูล 3 อย่าง
+                text = (
+                    f"[b]{self.flower_type.upper()}[/b]\n"
+                    f"ใช้เวลาปลูก: {self.flower_info['care_days']} วัน\n"
+                    f"ระดับออร่า: {int(self.flower_info['extra_affection'])}%\n"
+                    f"มูลค่า: {self.value} G"
+                )
                 if hasattr(screen, 'show_tooltip'):
                     screen.show_tooltip(pos, text)
-                
-                if self.hover_count == 4 and not self.driving_effect_activated:
-                    self.activate_driving_effect()
             else:
                 screen = app.root.get_screen('collection')
-                duration = int(time.time() - self.stored_time)
-                text = f"Stored: {duration}s\nStats: W:{self.stats['Water']} H:{self.stats['Health']}\nHover count: {self.hover_count}"
+                text = (
+                    f"[b]{self.flower_type.upper()}[/b]\n"
+                    f"ใช้เวลาปลูก: {self.flower_info['care_days']} วัน\n"
+                    f"ระดับออร่า: {int(self.flower_info['extra_affection'])}%\n"
+                    f"มูลค่า: {self.value} G"
+                )
                 if hasattr(screen, 'update_tooltip'):
                     screen.update_tooltip(pos, text)
         else:
@@ -112,13 +123,18 @@ class DraggableFlower(Scatter):
 
 
 class InventoryFlower(Image):
-    def __init__(self, flower_type, **kwargs):
+    def __init__(self, flower_data, **kwargs):
         super().__init__(**kwargs)
-        self.flower_type = flower_type
+        self.flower_data = flower_data
+        if isinstance(flower_data, str):
+            self.flower_type = flower_data
+        else:
+            self.flower_type = flower_data["type"]
+            
         self.size_hint = (None, 1)
         self.width = 120
-        img_src = f"assets/images/{flower_type}_3.png"
-        if not os.path.exists(img_src): img_src = f"assets/images/{flower_type}_3.PNG"
+        img_src = f"assets/images/{self.flower_type}_3.png"
+        if not os.path.exists(img_src): img_src = f"assets/images/{self.flower_type}_3.PNG"
         if not os.path.exists(img_src): img_src = "assets/images/flower_3.png"
         self.source = img_src
 
@@ -127,16 +143,16 @@ class InventoryFlower(Image):
             app = App.get_running_app()
             screen = app.root.get_screen('collection')
             
-            flower = DraggableFlower(flower_type=self.flower_type)
+            flower = DraggableFlower(flower_data=self.flower_data)
             flower.center = touch.pos
             screen.ids.garden_area.add_widget(flower)
             
             # Make the new scatter widget grab the touch to start dragging immediately
             flower.on_touch_down(touch)
             
-            # Remove from inventory both visually and from save state
-            if self.flower_type in app.unlocked_flowers:
-                app.unlocked_flowers.remove(self.flower_type)
+            # Remove from inventory
+            if self.flower_data in app.unlocked_flowers:
+                app.unlocked_flowers.remove(self.flower_data)
                 app.save_app_state()
             if self.parent:
                 self.parent.remove_widget(self)
@@ -149,15 +165,32 @@ class CollectionScreen(Screen):
     def on_pre_enter(self, *args):
         app = App.get_running_app()
         self.ids.inventory_grid.clear_widgets()
+        
+        total_value = 0
         if len(app.unlocked_flowers) > 0:
-            for f in app.unlocked_flowers:
-                flower = InventoryFlower(flower_type=f)
+            for f_data in app.unlocked_flowers:
+                # คำนวณมูลค่ารวมใน Inventory
+                if isinstance(f_data, dict):
+                    val = 50 + int(f_data.get("extra_affection", 0) * 4)
+                    total_value += val
+                    flower = InventoryFlower(flower_data=f_data)
+                else:
+                    total_value += 50
+                    flower = InventoryFlower(flower_data=f_data)
                 self.ids.inventory_grid.add_widget(flower)
+        
+        # เพิ่มมูลค่าดอกไม้ที่วางอยู่ในสวนด้วย
+        for child in self.ids.garden_area.children:
+            if hasattr(child, 'value'):
+                total_value += child.value
+
+        # อัปเดตยอดเงินรวม (ใช้ ID จาก KV เพื่อตำแหน่งที่ถูกต้อง)
+        self.ids.total_money_lbl.text = f"รวมทั้งหมด: {total_value} G"
                 
         if not hasattr(self, 'tooltip'):
             self.tooltip = Label(
                 text="", font_name='assets/fonts/font.ttf', font_size='18sp',
-                size_hint=(None, None), size=(150, 60), opacity=0
+                size_hint=(None, None), size=(150, 60), opacity=0, markup=True
             )
             with self.tooltip.canvas.before:
                 Color(0, 0, 0, 0.8)
@@ -188,46 +221,27 @@ class CollectionScreen(Screen):
 
     def show_stats_popup(self, flower):
         content = BoxLayout(orientation='vertical', padding=10, spacing=10)
+        # แปลงชื่อประเภทเป็นภาษาไทยแบบง่าย
+        flower_thai = {
+            "rose": "กุหลาบ", "tulip": "ทิวลิป", "daisy": "เดซี่",
+            "sunflower": "ทานตะวัน", "hibiscus": "ชบา", "lilly": "ลิลลี่"
+        }.get(flower.flower_type, flower.flower_type)
+
         stats_text = (
-            f"Type: {flower.flower_type}\n"
-            f"Stored for: {int(time.time() - flower.stored_time)}s\n"
-            f"Water: {flower.stats['Water']}/100\n"
-            f"Health: {flower.stats['Health']}/100\n"
-            f"Care: {flower.stats['Care']}/100\n\n"
-            f"Active Buffs:\n" + "\n".join(flower.active_buffs)
+            f"ประเภท: {flower_thai}\n"
+            f"ใช้เวลาปลูก: {flower.flower_info['care_days']} วัน\n"
+            f"ระดับออร่า: {int(flower.flower_info['extra_affection'])}%\n"
+            f"มูลค่าประเมิน: {flower.value} G\n"
         )
         lbl = Label(text=stats_text, font_name='assets/fonts/font.ttf', font_size='18sp')
         content.add_widget(lbl)
         
-        btn_box = BoxLayout(size_hint_y=0.3, spacing=10)
-        water_btn = Button(text="Water Flower", font_name='assets/fonts/font.ttf', background_color=(0.2, 0.5, 0.8, 1))
-        def _water(btn):
-            flower.stats['Water'] = min(100, flower.stats['Water'] + 10)
-            lbl.text = (
-                f"Type: {flower.flower_type}\n"
-                f"Stored for: {int(time.time() - flower.stored_time)}s\n"
-                f"Water: {flower.stats['Water']}/100\n"
-                f"Health: {flower.stats['Health']}/100\n"
-                f"Care: {flower.stats['Care']}/100\n\n"
-                f"Active Buffs:\n" + "\n".join(flower.active_buffs)
-            )
-        water_btn.bind(on_release=_water)
-        
-        stand_btn = Button(text="Check Stand", font_name='assets/fonts/font.ttf', background_color=(0.8, 0.6, 0.2, 1))
-        def _stand(btn):
-            stand_lbl = Label(text="Stand: Sturdy\nLocation: Theater Store", font_name='assets/fonts/font.ttf', font_size='16sp')
-            content.add_widget(stand_lbl)
-            stand_btn.disabled = True
-        stand_btn.bind(on_release=_stand)
-        
-        close_btn = Button(text="Close", font_name='assets/fonts/font.ttf', background_color=(0.8, 0.3, 0.3, 1))
-        
-        btn_box.add_widget(water_btn)
-        btn_box.add_widget(stand_btn)
+        btn_box = BoxLayout(size_hint_y=0.2, spacing=10)
+        close_btn = Button(text="ปิดหน้าต่าง", font_name='assets/fonts/font.ttf', background_color=(0.8, 0.3, 0.3, 1))
         btn_box.add_widget(close_btn)
         content.add_widget(btn_box)
 
-        popup = Popup(title="Flower Stats & Stand", title_font='assets/fonts/font.ttf', content=content, size_hint=(0.8, 0.8))
+        popup = Popup(title="ข้อมูลสถิติของดอกไม้", title_font='assets/fonts/font.ttf', content=content, size_hint=(0.6, 0.5))
         close_btn.bind(on_release=popup.dismiss)
         popup.open()
 

@@ -15,7 +15,7 @@ def show_how_to_play_popup():
     
     # --- 1. ส่วนหัว (Header) ---
     header = Label(
-        text="[color=2E7D32][b]คู่มือการเล่น (MANUAL)[/b][/color]",
+        text="[color=2E7D32][b]คู่มือการเล่น[/b][/color]",
         markup=True,
         font_name='assets/fonts/font.ttf',
         font_size='32sp',
@@ -48,15 +48,15 @@ def show_how_to_play_popup():
 
         grid.add_widget(row)
 
-    add_info_row("สภาพอากาศวันนี้ (Today's Weather)", 
+    add_info_row("สภาพอากาศวันนี้", 
                  f"ตอนนี้อากาศ: [color=D32F2F][b]{weather_now}[/b][/color] (ระวัง! มีผลกับความไวในการเติบโตเมื่อรดน้ำ)")
-    add_info_row("ระบบพักผ่อน (Stamina System)", 
+    add_info_row("ระบบพลังงาน", 
                  "แต่ละวันคุณมีพลังงาน 100 จุด (หลอดสีฟ้า) หากหมดจะต้องกด 'พักผ่อน' เพื่อเริ่มเช้าวันใหม่")
-    add_info_row("รดน้ำ (Water)", 
+    add_info_row("การรดน้ำ", 
                  "[color=1976D2][b]ใช้พลังงาน 10[/b][/color] | วันปกติเพิ่มความเติบโต +15 (ถ้าเป็น[b]วันแดดจัด[/b] หรือ [b]ฝนตก[/b] จะได้โบนัสเป็น [b]+30[/b])")
-    add_info_row("พรวนดิน (Till Soil)", 
+    add_info_row("การพรวนดิน", 
                  "[color=F57C00][b]ใช้พลังงาน 15[/b][/color] | ดินร่วนซุยทำให้รากเดินดี เพิ่มการเติบโตสม่ำเสมอ +20 จุด")
-    add_info_row("ใส่ปุ๋ย (Fertilize)", 
+    add_info_row("การใส่ปุ๋ย", 
                  "[color=7B1FA2][b]ใช้พลังงาน 20[/b][/color] | บำรุงดินแบบจัดเต็ม! ต้นไม้จะโตไวมาก เพิ่มการเติบโตถึง +30 จุด")
 
     content.add_widget(grid)

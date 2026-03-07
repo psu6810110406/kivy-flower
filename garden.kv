@@ -1,3 +1,5 @@
+#:import Clock kivy.clock.Clock
+
 # garden.kv
 # ประกาศตัวจัดการหน้าจอ
 WindowManager:
@@ -9,7 +11,7 @@ WindowManager:
 
 <MinimalButton>:
     font_name: 'assets/fonts/font.ttf'
-    font_size: '22sp'
+    font_size: self.height * 0.42 if self.height > 0 else '22sp'
     color: 1, 1, 1, 1
     
     background_normal: ''
@@ -32,7 +34,7 @@ WindowManager:
 
 <EarthButton@Button>:
     font_name: 'assets/fonts/font.ttf'
-    font_size: '24sp'
+    font_size: self.height * 0.42 if self.height > 0 else '24sp'
     background_normal: '' 
     canvas.before:
         PushMatrix
@@ -62,7 +64,7 @@ WindowManager:
             rounded_rectangle: (self.x, self.y, self.width, self.height, 25)
 
     Label:
-        text: "GAME OVER"
+        text: "จบการปลูก"
         font_name: 'assets/fonts/font.ttf'
         font_size: '48sp'  # ขนาดใหญ่สื่อความหมายทันที
         color: 0.8, 0.2, 0.2, 1  # สีแดงสด (Red)
@@ -116,30 +118,30 @@ WindowManager:
                 size_hint_y: 1.0
 
             MinimalButton:
-                text: "Start Journey"
+                text: "เริ่มการปลูก"
                 size_hint_y: None
-                height: 50
+                height: root.height * 0.08 if root.height > 0 else 50
                 on_release: app.root.current = "levels"
                 on_press: app.play_click()
             
             MinimalButton:
-                text: "My Collection"
+                text: "คอลเลคชันของฉัน"
                 size_hint_y: None
-                height: 50
+                height: root.height * 0.08 if root.height > 0 else 50
                 on_release: app.root.current = "collection"
                 on_press: app.play_click()
                 
             MinimalButton:
-                text: "How to Play"
+                text: "วิธีเล่น"
                 size_hint_y: None
-                height: 50
+                height: root.height * 0.08 if root.height > 0 else 50
                 on_release: app.show_how_to_play()
                 on_press: app.play_click()
 
             MinimalButton:
-                text: "Settings"
+                text: "ตั้งค่า"
                 size_hint_y: None
-                height: 50
+                height: root.height * 0.08 if root.height > 0 else 50
                 on_release: app.root.current = "settings"
                 on_press: app.play_click()
 
@@ -173,21 +175,22 @@ WindowManager:
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
             Label:
-                text: "เรือนกระจก (Greenhouse)"
+                text: "เรือนกระจก"
                 font_name: 'assets/fonts/font.ttf'
-                font_size: '36sp'
-                color: 0.1, 0.4, 0.1, 1  # สีเขียวเข้ม
-                outline_width: 1
+                font_size: self.height * 0.6
+                color: 0.95, 0.98, 0.95, 1  # สีขาวนวลเพื่อให้อ่านง่ายบนพื้นหลังเข้ม
+                outline_width: 1.5
+                outline_color: 0.1, 0.2, 0.1, 1
                 size_hint_y: None
-                height: 60
+                height: root.height * 0.1
 
             Label:
                 text: "เลือกกระถางและเมล็ดพันธุ์ที่คุณต้องการปลูกวันนี้"
                 font_name: 'assets/fonts/font.ttf'
-                font_size: '20sp'
-                color: 0.2, 0.3, 0.2, 1
+                font_size: self.height * 0.45
+                color: 0.9, 0.95, 0.9, 1
                 size_hint_y: None
-                height: 40
+                height: root.height * 0.06
 
             # ใช้ GridLayout เพื่อเรียงปุ่ม
             GridLayout:
@@ -231,9 +234,9 @@ WindowManager:
                 height: 20
 
             MinimalButton:
-                text: "Back to Menu"
+                text: "กลับไปหน้าเมนู"
                 size_hint_y: None
-                height: 70
+                height: root.height * 0.1
                 size_hint_x: 0.6
                 pos_hint: {'center_x': 0.5}
                 background_color: 0.5, 0.6, 0.5, 0.9 # สีเทาอมเขียว
@@ -264,20 +267,63 @@ WindowManager:
 # --- กำหนด Custom Widget สำหรับ Status Bar ที่มีป้ายชื่อ ---
 <StatusGauge>:
     orientation: 'vertical'
-    spacing: 2
+    spacing: 1
     
     Label:
         text: root.label_text
         font_name: 'assets/fonts/font.ttf'
-        font_size: '14sp'
-        size_hint_y: None
-        height: 18
-        color: 0.9, 0.9, 0.9, 1
+        font_size: '16sp'
+        size_hint_y: 0.35
+        color: 0.95, 0.95, 0.95, 1
         
     VerticalProgressBar:
         value: root.val
         max: root.max_v
         bar_color: root.color
+
+# --- กำหนด Custom Widget สำหรับเนื้อหาสรุป/แจ้งเตือนแบบพรีเมียม ---
+<ModernPopupContent>:
+    orientation: 'vertical'
+    padding: [25, 30, 25, 25]
+    spacing: 20
+    canvas.before:
+        Color:
+            rgba: 0.96, 0.96, 0.94, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [20]
+        Color:
+            rgba: 0.2, 0.4, 0.2, 0.1
+        Line:
+            width: 1.5
+            rounded_rectangle: (self.x, self.y, self.width, self.height, 20)
+
+    Label:
+        text: root.title_text
+        font_name: 'assets/fonts/font.ttf'
+        font_size: '30sp'
+        color: 0.1, 0.3, 0.1, 1
+        bold: True
+        size_hint_y: None
+        height: 60
+
+    Label:
+        text: root.desc_text
+        font_name: 'assets/fonts/font.ttf'
+        font_size: '18sp'
+        color: 0.2, 0.2, 0.2, 1
+        halign: 'center'
+        valign: 'middle'
+        text_size: self.width, None
+        size_hint_y: 1
+
+    BoxLayout:
+        id: button_area
+        orientation: 'vertical'
+        spacing: 12
+        size_hint_y: None
+        height: self.minimum_height
 
 # ----------------- หน้า 3: พื้นที่เล่นเกม -----------------
 <GameScreen>:
@@ -287,40 +333,55 @@ WindowManager:
             source: "assets/images/gamebg.png"
             fit_mode: "fill"
 
-        # 2. พื้นที่ดอกไม้ (ย้ายมาไว้ด้านบนสุดของโค้ดเพื่อไม่ให้บังปุ่ม)
-        RelativeLayout:
-            size_hint: None, None
-            size: 600, 600
-            pos_hint: {'center_x': 0.5, 'center_y': 0.58} # เลื่อนขึ้นประมาณ 40-50 พิกเซล (0.08 ของจอ)
-
-            # ป้ายชื่อ (ลอยอยู่เหนือหัวดอกไม้)
+        # 1. แถบหัวข้อด้านบนสุด (Title Label)
+        BoxLayout:
+            name: 'title_bar'
+            size_hint: 0.3, 0.08
+            pos_hint: {'center_x': 0.5, 'top': 0.98}
+            orientation: 'vertical'
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 0.6
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [15]
             Label:
                 id: title_lbl
                 text: f"กำลังปลูก {getattr(root, 'flower_name', '...')}"
                 font_name: 'assets/fonts/font.ttf'
-                font_size: '20sp'
-                size_hint: None, None
-                size: 180, 40
-                pos_hint: {'center_x': 0.5, 'top': 1.15}
-                canvas.before:
-                    Color:
-                        rgba: 0, 0, 0, 0.6
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [10,]
+                font_size: self.height * 0.6 if self.height > 0 else '20sp'
+                color: 1, 1, 1, 1
 
+        # 2. พื้นที่ดอกไม้กลางจอ (ปรับตำแหน่งใหม่ให้ไม่ลอยเกินไป)
+        RelativeLayout:
+            size_hint: None, None
+            size: 600, 600
+            pos_hint: {'center_x': 0.5, 'center_y': 0.45}
+
+            # เอฟเฟกต์ออร่า (พื้นหลัง)
+            Image:
+                id: aura_img
+                source: "assets/images/aura_effect.png"
+                size_hint: None, None
+                size: 380, 380
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                opacity: min(max(0, root.satisfaction_score - 100) / 100.0, 1.0)
+                canvas.before:
+                    PushMatrix
+                    Rotate:
+                        angle: (Clock.get_time() * 20) % 360
+                        origin: self.center
+                canvas.after:
+                    PopMatrix
+
+            # ตัวดอกไม้ (ใช้ Scatter ให้มีน้ำหนัก)
             Scatter:
                 id: flower_scatter
                 size: 400, 400
                 do_rotation: False
                 do_translation: False
-                # รูปดอกไม้และออร่า
-                Image:
-                    id: aura_glow
-                    source: "assets/images/aura_effect.png"
-                    size: self.parent.size
-                    opacity: min(root.extra_affection / 100.0, 1.0) # แสดงออร่าตามค่าความเอาใจใส่ที่เกินมา 100 โดยไม่จำกัดเฟส
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                 Image:
                     id: flower_img
                     source: root.flower_image_source
@@ -332,9 +393,8 @@ WindowManager:
             id: day_lbl
             text: f"วันที่: {root.care_days + 1}"
             font_name: 'assets/fonts/font.ttf'
-            font_size: '20sp'
-            size_hint: None, None
-            size: 110, 45
+            font_size: self.height * 0.45
+            size_hint: 0.15, 0.08
             pos_hint: {'right': 0.98, 'top': 0.98}
             color: 1, 1, 1, 1
             bold: True
@@ -345,6 +405,16 @@ WindowManager:
                     pos: self.pos
                     size: self.size
                     radius: [10]
+
+        # 3. ปุ่มเมนู / ออก (ย้ายมาไว้เดี่ยวๆ ที่ปุ่มเดียว)
+        MinimalButton:
+            text: "ออก"
+            size_hint: None, None
+            size: 100, 50
+            pos_hint: {'x': 0.02, 'top': 0.98}
+            btn_color: 0.4, 0.4, 0.4, 1
+            on_release: root.show_exit_popup()
+            on_press: app.play_click()
 
         # 3. แถบ HUD ด้านซ้าย (รวบหลอดสถานะทั้งหมด)
         BoxLayout:
@@ -412,7 +482,7 @@ WindowManager:
                 id: result_lbl
                 text: "รอดูผลการดูแล..."
                 font_name: 'assets/fonts/font.ttf'
-                font_size: '18sp'
+                font_size: self.height * 0.5 if self.height > 0 else '18sp'
                 color: 0.2, 0.2, 0.2, 1 
                 size_hint_y: 0.25
 
@@ -422,10 +492,10 @@ WindowManager:
                 orientation: 'horizontal'
                 spacing: 10
                 
-                # ตารางปุ่มหลัก
+                # ตารางปุ่มหลัก (ปรับเป็น 2 คอลัมน์ x 2 แถว เพื่อความสมดุล)
                 GridLayout:
                     id: main_actions
-                    cols: 3
+                    cols: 2
                     spacing: 12
                     size_hint_x: 1 if root.current_phase < 4 else 0.001
                     opacity: 1 if root.current_phase < 4 else 0
@@ -447,14 +517,6 @@ WindowManager:
                         text: "พักผ่อน"
                         btn_color: 0.2, 0.7, 0.5, 1
                         on_release: root.next_day_action()
-                    MinimalButton:
-                        text: "ออกชั่วคราว"
-                        btn_color: 0.5, 0.5, 0.5, 1
-                        on_release: root.temp_exit()
-                    MinimalButton:
-                        text: "ยอมแพ้"
-                        btn_color: 0.8, 0.3, 0.3, 1
-                        on_release: root.give_up()
 
                 # ปุ่มเก็บเกี่ยว (แยกออกมาเป็นอิสระ)
                 MinimalButton:
@@ -488,12 +550,38 @@ WindowManager:
 <CollectionScreen>:
     name: "collection"
     FloatLayout:
+        canvas.before:
+            Color:
+                rgba: 0.1, 0.1, 0.1, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        
         # 1. ฉากหลังสวนดอกไม้ที่สวยงาม
         Image:
             source: "assets/images/collectionbg.png"  # ภาพสวนที่มีดอกไม้เต็ม
             fit_mode: "cover"
             size_hint: 1, 1
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+        # 1.3 ป้ายบอกเงินรวมมุมซ้ายบน
+        Label:
+            id: total_money_lbl
+            text: "รวมทั้งหมด: 0 G"
+            font_name: 'assets/fonts/font.ttf'
+            font_size: '22sp'
+            size_hint: None, None
+            size: 200, 50
+            pos_hint: {'x': 0.02, 'top': 0.98}
+            color: 1, 1, 1, 1
+            bold: True
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 0.6
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [15]
 
         # 2. พื้นที่สำหรับวางดอกไม้ที่ปลูกสำเร็จ (ใช้สำหรับลากวาง)
         # เราจะสร้าง Widget เปล่าไว้รับการลากวางตรงนี้
@@ -521,11 +609,12 @@ WindowManager:
                     padding: 10
                     spacing: 10
 
-        Button:
-            text: "Back"
-            font_name: 'assets/fonts/font.ttf'
-            size_hint: 0.15, 0.08
+        MinimalButton:
+            text: "กลับ"
+            size_hint: None, None
+            size: root.width * 0.15, root.height * 0.08
             pos_hint: {'right': 0.98, 'top': 0.98}
+            btn_color: 0.4, 0.5, 0.4, 1  # สีเทาอมเขียวให้เข้ากับปุ่มออก
             on_release: app.root.current = "menu"
             on_press: app.play_click()
 
@@ -553,7 +642,7 @@ WindowManager:
                     radius: [20]
                     
             Label:
-                text: "ตั้งค่า (Settings)"
+                text: "ตั้งค่า"
                 font_name: 'assets/fonts/font.ttf'
                 font_size: '36sp'
                 size_hint_y: None
@@ -579,7 +668,7 @@ WindowManager:
                 size_hint_y: 1
                 
             MinimalButton:
-                text: "Back to Menu"
+                text: "กลับไปหน้าเมนู"
                 size_hint_y: None
                 height: 70
                 size_hint_x: 0.6

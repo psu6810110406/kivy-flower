@@ -11,6 +11,7 @@ from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import NumericProperty
+from kivy.clock import Clock
 #from kivy.core.audio import SoundLoader
 
 class LevelScreen(Screen):
@@ -33,7 +34,6 @@ class GameScreen(Screen):
         super().__init__(**kwargs)
         self.current_flower = ""
         # ผูก property ข้ามเฟส
-        self.bind(current_phase=self.on_phase_change)
         
         self.action_cooldown = False # ป้องกันการกดรัว
         Window.bind(mouse_pos=self.on_mouse_pos)
@@ -91,8 +91,11 @@ class GameScreen(Screen):
         app = App.get_running_app()
         self.current_flower = app.current_playing_flower
         
-        flowers_th = {"rose": "กุหลาบ", "tulip": "ทิวลิป", "daisy": "เดซี่", "sunflower": "ทานตะวัน", "hibiscus": "ชบา"}
-        self.ids.title_lbl.text = f"ด่าน: กำลังปลูก {flowers_th.get(self.current_flower, self.current_flower)}"
+        flowers_th = {
+            "rose": "กุหลาบ", "tulip": "ทิวลิป", "daisy": "เดซี่", 
+            "sunflower": "ทานตะวัน", "hibiscus": "ชบา", "lilly": "ลิลลี่"
+        }
+        self.ids.title_lbl.text = f"กำลังปลูก: {flowers_th.get(self.current_flower, self.current_flower)}"
         
         # ฟื้นฟูความก้าวหน้าถ้าเคยปลูกไว้
         self.watered_today = False
@@ -116,6 +119,7 @@ class GameScreen(Screen):
                 self.care_days = progress_data.get("care_days", 0)
 
             self.phase_limit = self.get_phase_limit()
+            self.flower_image_source = self.get_flower_image(self.current_phase - 1)
             
             self.ids.result_lbl.text = "กลับมาดูแลต่อแล้ว!"
             self.ids.flower_scatter.scale = 1.0
@@ -167,7 +171,7 @@ class GameScreen(Screen):
             
         return f"assets/images/seed.png"  # Fallback พื้นฐานที่สุด
 
-    def on_phase_change(self, instance, value):
+    def on_current_phase(self, instance, value):
         self.flower_image_source = self.get_flower_image(value - 1)
         self.phase_limit = self.get_phase_limit()
 
@@ -366,8 +370,13 @@ class GameScreen(Screen):
     def collect_flower(self):
         if self.current_phase >= 4:
             app = App.get_running_app()
-            # เพิ่มดอกไม้ลงใน Collection
-            app.unlocked_flowers.append(self.current_flower)
+            # เพิ่มดอกไม้ลงใน Collection พร้อมเก็บข้อมูลสถิติ
+            flower_data = {
+                "type": self.current_flower,
+                "care_days": self.care_days,
+                "extra_affection": self.extra_affection
+            }
+            app.unlocked_flowers.append(flower_data)
             self.update_status("เก็บเข้า Collection แล้ว!")
             # กลับไปหน้าหลัก
             app.root.current = "menu"
@@ -376,6 +385,82 @@ class GameScreen(Screen):
                 del app.flower_progress[self.current_flower]
             app.save_app_state()
             print("You won!")   
+
+    def show_exit_popup(self):
+        from kivy.factory import Factory
+        from kivy.uix.popup import Popup
+        
+        content = Factory.ModernPopupContent(
+            title_text="ยืนยันการออก",
+            desc_text="คุณต้องการออกชั่วคราวหรือจะยอมแพ้เพื่อเริ่มใหม่?"
+        )
+        
+        temp_btn = Factory.MinimalButton(
+            text="ออกชั่วคราว (เซฟข้อมูล)",
+            btn_color=(0.2, 0.5, 0.8, 1),
+            size_hint_y=None, height=60
+        )
+        
+        giveup_btn = Factory.MinimalButton(
+            text="ยอมแพ้ (เริ่มใหม่ทั้งหมด)",
+            btn_color=(0.8, 0.3, 0.3, 1),
+            size_hint_y=None, height=60
+        )
+        
+        close_btn = Factory.MinimalButton(
+            text="กลับไปดูแลต้นไม้",
+            btn_color=(0.4, 0.4, 0.4, 1),
+            size_hint_y=None, height=60
+        )
+        
+        content.ids.button_area.add_widget(temp_btn)
+        content.ids.button_area.add_widget(giveup_btn)
+        content.ids.button_area.add_widget(close_btn)
+        
+        popup = Popup(
+            title="", separator_height=0,
+            content=content, size_hint=(0.7, 0.6),
+            auto_dismiss=True, background_color=(0,0,0,0)
+        )
+        
+        temp_btn.bind(on_release=lambda x: [popup.dismiss(), self.temp_exit()])
+        giveup_btn.bind(on_release=lambda x: [popup.dismiss(), self.confirm_give_up()])
+        close_btn.bind(on_release=popup.dismiss)
+        
+        popup.open()
+
+    def confirm_give_up(self):
+        from kivy.factory import Factory
+        from kivy.uix.popup import Popup
+
+        content = Factory.ModernPopupContent(
+            title_text="คำเตือน!",
+            desc_text="หากคุณยอมแพ้ ข้อมูลการเติบโตจะหายไปทั้งหมด\nต้องการยืนยันใช่หรือไม่?"
+        )
+        
+        yes_btn = Factory.MinimalButton(
+            text="ใช่, ยอมแพ้",
+            btn_color=(0.8, 0.2, 0.2, 1),
+            size_hint_y=None, height=60
+        )
+        no_btn = Factory.MinimalButton(
+            text="ไม่, ย้อนกลับ",
+            btn_color=(0.4, 0.4, 0.4, 1),
+            size_hint_y=None, height=60
+        )
+        
+        content.ids.button_area.add_widget(yes_btn)
+        content.ids.button_area.add_widget(no_btn)
+        
+        popup = Popup(
+            title="", separator_height=0,
+            content=content, size_hint=(0.6, 0.45),
+            background_color=(0,0,0,0)
+        )
+        
+        yes_btn.bind(on_release=lambda x: [popup.dismiss(), self.give_up()])
+        no_btn.bind(on_release=popup.dismiss)
+        popup.open()
 
     def give_up(self):
         self.reset_game()

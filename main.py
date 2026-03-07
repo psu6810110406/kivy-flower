@@ -24,6 +24,10 @@ class StatusGauge(BoxLayout):
     max_v = NumericProperty(100)
     color = ColorProperty([1, 1, 1, 1])
 
+class ModernPopupContent(BoxLayout):
+    title_text = StringProperty("แจ้งเตือน")
+    desc_text = StringProperty("")
+
 import database
 import random
 
@@ -47,6 +51,7 @@ Factory.register('CollectionScreen', cls=CollectionScreen)
 Factory.register('SettingsScreen', cls=SettingsScreen)
 Factory.register('MinimalButton', cls=MinimalButton)
 Factory.register('StatusGauge', cls=StatusGauge)
+Factory.register('ModernPopupContent', cls=ModernPopupContent)
 
 class MenuScreen(Screen):
     pass
@@ -113,15 +118,15 @@ class FlowerApp(App):
         layout.bind(size=update_rect, pos=update_rect)
         
         tips = [
-            "TIP: ดอกไม้แต่ละชนิดชอบสภาพอากาศไม่เหมือนกันนะ",
-            "TIP: ควรดูแลแต้ม 'ความเอาใจใส่' ให้สูงเข้าไว้!",
-            "TIP: ถ้าฝนตกอยู่แล้วก็ไม่เปลี่ยนใจรดน้ำหรอกนะ ต้นไม้จะแฉะ!",
-            "TIP: ระวังอย่าลืมรดน้ำในวันแดดจัดนะ ต้นไม้จะเหี่ยวเฉาได้!"
+            "เคล็ดลับ: ดอกไม้แต่ละชนิดชอบสภาพอากาศไม่เหมือนกันนะ",
+            "เคล็ดลับ: ควรดูแลแต้ม 'ความเอาใจใส่' ให้สูงเข้าไว้!",
+            "เคล็ดลับ: ถ้าฝนตกอยู่แล้วก็ไม่เปลี่ยนใจรดน้ำหรอกนะ ต้นไม้จะตายได้!",
+            "เคล็ดลับ: ระวังอย่าลืมรดน้ำในวันแดดจัดนะ ต้นไม้จะเหี่ยวเฉาได้!"
         ]
         chosen_tip = random.choice(tips)
         
         lbl = Label(
-            text=f'[b]Loading Dream Garden...[/b]\n\n[color=A5D6A7]{chosen_tip}[/color]', 
+            text=f'[b]ยินดีต้อนรับสู่ สวนในฝัน...[/b]\n\n[color=A5D6A7]{chosen_tip}[/color]', 
             markup=True,
             font_name='assets/fonts/font.ttf', 
             font_size='28sp',
