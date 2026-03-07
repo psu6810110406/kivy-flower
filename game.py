@@ -12,6 +12,7 @@ from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import NumericProperty
 from kivy.clock import Clock
+from kivy.core.audio import SoundLoader
 #from kivy.core.audio import SoundLoader
 
 class LevelScreen(Screen):
@@ -354,12 +355,17 @@ class GameScreen(Screen):
 
     def check_phase_up(self):
         limit = self.get_phase_limit()
-        # เช็คทั้งความเจริญเติบโต และ ความเอาใจใส่ (ตามความต้องการที่ว่าถ้าเกิน 100/ขีดจำกัด ให้เลด้าขึ้นเฟสถัดไป)
         if self.current_phase < 4 and (self.growth_score >= limit or self.satisfaction_score >= limit):
             self.current_phase += 1
-            self.growth_score = 0 # รีเซ็ตแต้มเติบโด
-            self.satisfaction_score = 100 # รีเซ็ตความเอาใจใส่กลับมาเริ่มต้นที่ความสดใส (หรือค่าเริ่มต้น)
+            self.growth_score = 0 
+            self.satisfaction_score = 100 
             
+            # --- เพิ่มโค้ดเสียง Level Up ตรงนี้ ---
+            sound = SoundLoader.load('assets/sound/levelup.mp3') # ปรับ path ให้ตรงกับที่เก็บไฟล์จริง เช่น 'assets/sounds/levelup.mp3'
+            if sound:
+                sound.play()
+            # ---------------------------------
+
             if self.current_phase == 4:
                 self.update_status("ยินดีด้วย! ดอกไม้บานเต็มที่แล้ว มีออร่าพุ่งขึ้นมา! เก็บเกี่ยวได้เลย!")
             else:

@@ -18,6 +18,9 @@ WindowManager:
     background_down: ''
     background_color: 0, 0, 0, 0 
     
+    # เพิ่มเสียงคลิกอัตโนมัติให้กับปุ่ม MinimalButton ทุกปุ่ม
+    on_press: app.play_click()
+    
     canvas.before:
         Color:
             rgba: (self.btn_color[0], self.btn_color[1], self.btn_color[2], 0.6 if self.state == 'normal' else 0.9)
@@ -36,6 +39,10 @@ WindowManager:
     font_name: 'assets/fonts/font.ttf'
     font_size: self.height * 0.42 if self.height > 0 else '24sp'
     background_normal: '' 
+    
+    # เพิ่มเสียงคลิกอัตโนมัติให้กับปุ่ม EarthButton ทุกปุ่ม
+    on_press: app.play_click()
+
     canvas.before:
         PushMatrix
         Scale:
@@ -91,13 +98,11 @@ WindowManager:
             id: retry_btn
             text: "ปลูกใหม่"
             btn_color: 0.2, 0.4, 0.9, 1  # ปุ่มหลัก: สีน้ำเงินสด (Primary Action)
-            on_press: app.play_click()
 
         MinimalButton:
             id: home_btn
             text: "ออกจากการปลูก"
             btn_color: 0.4, 0.5, 0.4, 1  # ปุ่มรอง: สีเทาอมเขียว (Secondary Action)
-            on_press: app.play_click()
 
 # ----------------- หน้า 1: เมนูหลัก -----------------
 <MenuScreen>:
@@ -122,28 +127,24 @@ WindowManager:
                 size_hint_y: None
                 height: root.height * 0.08 if root.height > 0 else 50
                 on_release: app.root.current = "levels"
-                on_press: app.play_click()
             
             MinimalButton:
                 text: "คอลเลคชันของฉัน"
                 size_hint_y: None
                 height: root.height * 0.08 if root.height > 0 else 50
                 on_release: app.root.current = "collection"
-                on_press: app.play_click()
                 
             MinimalButton:
                 text: "วิธีเล่น"
                 size_hint_y: None
                 height: root.height * 0.08 if root.height > 0 else 50
                 on_release: app.show_how_to_play()
-                on_press: app.play_click()
 
             MinimalButton:
                 text: "ตั้งค่า"
                 size_hint_y: None
                 height: root.height * 0.08 if root.height > 0 else 50
                 on_release: app.root.current = "settings"
-                on_press: app.play_click()
 
 
 # ----------------- หน้า 2: เลือกด่าน (เรือนกระจก) -----------------
@@ -200,34 +201,32 @@ WindowManager:
                 EarthButton:
                     text: "กุหลาบ"
                     background_color: 0.6, 0.3, 0.3, 0.9 # Earth Tone Muted Red
-                    on_press: app.play_click()
                     on_release: app.start_game("rose")
                     
                 EarthButton:
                     text: "ทิวลิป"
                     background_color: 0.5, 0.4, 0.5, 0.9 # Earth Tone Muted Purple
                     on_release: app.start_game("tulip")
-                    on_press: app.play_click()
+
                 EarthButton:
                     text: "เดซี่"
                     background_color: 0.6, 0.6, 0.3, 0.9 # Earth Tone Olive Yellow
                     on_release: app.start_game("daisy")
-                    on_press: app.play_click()
+
                 EarthButton:
                     text: "ทานตะวัน"
                     background_color: 0.7, 0.5, 0.2, 0.9 # Earth Tone Ochre
                     on_release: app.start_game("sunflower")
-                    on_press: app.play_click()
+
                 EarthButton:
                     text: "ชบา"
                     background_color: 0.7, 0.3, 0.3, 0.9 # Earth Tone Rust
                     on_release: app.start_game("hibiscus")
-                    on_press: app.play_click()
+
                 EarthButton:
                     text: "ลิลลี่"
                     background_color: 0.6, 0.6, 0.3, 0.9 # Earth Tone Rust
                     on_release: app.start_game("lilly")
-                    on_press: app.play_click()
 
             Widget:
                 size_hint_y: None
@@ -241,7 +240,6 @@ WindowManager:
                 pos_hint: {'center_x': 0.5}
                 background_color: 0.5, 0.6, 0.5, 0.9 # สีเทาอมเขียว
                 on_release: app.root.current = "menu"
-                on_press: app.play_click()
 
 # --- กำหนด Custom Widget สำหรับ Vertical ProgressBar ---
 <VerticalProgressBar@Widget>:
@@ -357,7 +355,7 @@ WindowManager:
         RelativeLayout:
             size_hint: None, None
             size: 600, 600
-            pos_hint: {'center_x': 0.5, 'center_y': 0.45}
+            pos_hint: {'center_x': 0.5, 'center_y': 0.53}
 
             # เอฟเฟกต์ออร่า (พื้นหลัง)
             Image:
@@ -414,7 +412,6 @@ WindowManager:
             pos_hint: {'x': 0.02, 'top': 0.98}
             btn_color: 0.4, 0.4, 0.4, 1
             on_release: root.show_exit_popup()
-            on_press: app.play_click()
 
         # 3. แถบ HUD ด้านซ้าย (รวบหลอดสถานะทั้งหมด)
         BoxLayout:
@@ -616,7 +613,6 @@ WindowManager:
             pos_hint: {'right': 0.98, 'top': 0.98}
             btn_color: 0.4, 0.5, 0.4, 1  # สีเทาอมเขียวให้เข้ากับปุ่มออก
             on_release: app.root.current = "menu"
-            on_press: app.play_click()
 
 # ----------------- หน้า 5: ตั้งค่า (Settings) -----------------
 <SettingsScreen>:
@@ -674,4 +670,3 @@ WindowManager:
                 size_hint_x: 0.6
                 pos_hint: {'center_x': 0.5}
                 on_release: app.root.current = "menu"
-                on_press: app.play_click()
