@@ -33,13 +33,13 @@ from kivy.lang import Builder
 from kivy.properties import NumericProperty, StringProperty
 from kivy.core.audio import SoundLoader
 
-# นำเข้าส่วนที่แยกออกไปแต่ละหน้า
+# นำเข้าไฟล์ที่แยกออกไป
 from collection import CollectionScreen
 from game import LevelScreen, GameScreen
 from how_to_play import show_how_to_play_popup
 from settings_screen import SettingsScreen
 
-# เพื่อให้ Kivy ค้นหาคลาสเหล่านี้เจอเมื่อโหลดไฟล์ .kv
+# ค้นหาคลาสเมื่อโหลดไฟล์
 from kivy.factory import Factory
 Factory.register('LevelScreen', cls=LevelScreen)
 Factory.register('GameScreen', cls=GameScreen)
