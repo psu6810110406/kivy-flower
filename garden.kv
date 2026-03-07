@@ -7,25 +7,25 @@ WindowManager:
     CollectionScreen:
     SettingsScreen:
 
-<MinimalButton@Button>:
+<MinimalButton>:
     font_name: 'assets/fonts/font.ttf'
     font_size: '22sp'
     color: 1, 1, 1, 1
-
+    
     background_normal: ''
     background_down: ''
     background_color: 0, 0, 0, 0 
-
+    
     canvas.before:
         Color:
-            rgba: (0.10, 0.40, 0.15, 0.5) if self.state=='normal' else (0.10, 0.40, 0.15, 0.85)
+            rgba: (self.btn_color[0], self.btn_color[1], self.btn_color[2], 0.6 if self.state == 'normal' else 0.9)
         RoundedRectangle:
             pos: self.pos
             size: self.size
-            radius: [18]   # ความมน
+            radius: [18]
 
         Color:
-            rgba: 0.05, 0.25, 0.10, 1
+            rgba: (self.btn_color[0]*0.5, self.btn_color[1]*0.5, self.btn_color[2]*0.5, 1)
         Line:
             width: 2
             rounded_rectangle: (self.x, self.y, self.width, self.height, 18)
@@ -96,7 +96,7 @@ WindowManager:
     FloatLayout:
         # พื้นหลังเรือนกระจก / ระเบียงต้นไม้
         Image:
-            source: "assets/images/garden.png" 
+            source: "assets/images/garden_page.png" 
             fit_mode: "fill"
 
         # เลเยอร์สีจางๆ เพื่อให้อ่านตัวหนังสือและเห็นปุ่มชัดขึ้น
@@ -207,264 +207,185 @@ WindowManager:
             size: self.width, self.height * min(1.0, (self.value / float(self.max))) if self.max else 0
             radius: [10,]
 
-# ----------------- หน้า 3: เล่นเกม (แบบใหม่) -----------------
+# --- กำหนด Custom Widget สำหรับ Status Bar ที่มีป้ายชื่อ ---
+<StatusGauge>:
+    orientation: 'vertical'
+    spacing: 2
+    
+    Label:
+        text: root.label_text
+        font_name: 'assets/fonts/font.ttf'
+        font_size: '14sp'
+        size_hint_y: None
+        height: 18
+        color: 0.9, 0.9, 0.9, 1
+        
+    VerticalProgressBar:
+        value: root.val
+        max: root.max_v
+        bar_color: root.color
+
+# ----------------- หน้า 3: พื้นที่เล่นเกม -----------------
 <GameScreen>:
     name: "game"
     FloatLayout:
-        # 1. พื้นหลังที่ปรับตามขนาดหน้าจออัตโนมัติ
         Image:
-            source: "assets/images/garden.png"
+            source: "assets/images/garden_page.png"
             fit_mode: "fill"
 
-        # 2. แผงควบคุมสไตล์ Minimal (ลอยอยู่ด้านหน้า)
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_x: None
-            width: min(self.parent.width * 0.9, 800)
-            size_hint_y: 0.95
+        # 2. พื้นที่ดอกไม้ (ย้ายมาไว้ด้านบนสุดของโค้ดเพื่อไม่ให้บังปุ่ม)
+        RelativeLayout:
+            size_hint: None, None
+            size: 400, 400
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-            padding: 20
-            spacing: 15
 
-            # ----------------- กรอบแสดงสภาพอากาศ (อยู่ด้านบนตรงกลาง) -----------------
-            BoxLayout:
-                size_hint_y: 0.1
+            # ป้ายชื่อ (ลอยอยู่เหนือหัวดอกไม้)
+            Label:
+                id: title_lbl
+                text: f"กำลังปลูก {getattr(root, 'flower_name', '...')}"
+                font_name: 'assets/fonts/font.ttf'
+                font_size: '20sp'
+                size_hint: None, None
+                size: 180, 40
+                pos_hint: {'center_x': 0.5, 'top': 1.15}
                 canvas.before:
                     Color:
-                        rgba: 1, 1, 1, 0.15 # สีขาวจางๆ
+                        rgba: 0, 0, 0, 0.6
                     RoundedRectangle:
                         pos: self.pos
                         size: self.size
-                        radius: [15,]
-                Label:
-                    text: f"สภาพอากาศ: {app.weather}"
-                    font_name: 'assets/fonts/font.ttf'
-                    font_size: '22sp'
-                    color: 1, 0.8, 0, 1
+                        radius: [10,]
 
-            # ----------------- พื้นที่ปลูกต้นไม้และป้ายสถานะ (ตรงกลาง) -----------------
-            FloatLayout:
-                size_hint_y: 0.7
+            Scatter:
+                id: flower_scatter
+                size: 400, 400
+                do_rotation: False
+                do_translation: False
+                # รูปดอกไม้และออร่า
+                Image:
+                    id: aura_glow
+                    source: "assets/images/aura_effect.png"
+                    size: self.parent.size
+                    opacity: min(root.extra_affection / 100.0, 1.0) if getattr(root, 'current_phase', 1) == 4 else 0
+                Image:
+                    id: flower_img
+                    source: root.flower_image_source
+                    size: self.parent.size
+                    fit_mode: "contain"
 
-                # ----------------- หลอดพลังงานแนวตั้ง (ซ้าย) -----------------
-                BoxLayout:
-                    id: stamina_box
-                    orientation: 'vertical'
-                    size_hint: None, 0.6
-                    width: 60
-                    pos_hint: {'x': 0.02, 'center_y': 0.5}
-                    spacing: 10
-                    
-                    Label:
-                        text: "พลังงาน"
-                        font_name: 'assets/fonts/font.ttf'
-                        font_size: '18sp'
-                        size_hint_y: None
-                        height: 30
-                        canvas.before:
-                            Color:
-                                rgba: 0, 0, 0, 0.5
-                            RoundedRectangle:
-                                pos: self.pos
-                                size: self.size
-                                radius: [5,]
-                    VerticalProgressBar:
-                        max: 100
-                        value: app.stamina
-                        bar_color: 0.2, 0.6, 0.8, 1 # สีฟ้าสำหรับพลังงาน
+        # 3. แถบ HUD ด้านซ้าย (รวบหลอดสถานะทั้งหมด)
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint: None, 0.45
+            width: 150
+            pos_hint: {'x': 0.02, 'center_y': 0.65}
+            spacing: 12
+            padding: 15
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 0.6
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [15,]
 
-                # ----------------- หลอดความเอาใจใส่แนวตั้ง (ซ้ายถัดจากพลังงาน) -----------------
-                BoxLayout:
-                    id: care_box
-                    orientation: 'vertical'
-                    size_hint: None, 0.6
-                    width: 60
-                    pos_hint: {'x': 0.15, 'center_y': 0.5}
-                    spacing: 10
-                    
-                    Label:
-                        text: "เอาใจใส่"
-                        font_name: 'assets/fonts/font.ttf'
-                        font_size: '16sp'
-                        size_hint_y: None
-                        height: 30
-                        canvas.before:
-                            Color:
-                                rgba: 0, 0, 0, 0.5
-                            RoundedRectangle:
-                                pos: self.pos
-                                size: self.size
-                                radius: [5,]
-                    VerticalProgressBar:
-                        max: 100
-                        value: root.satisfaction_score
-                        bar_color: 0.8, 0.2, 0.6, 1 # สีชมพู/แดง สำหรับความเอาใจใส่
+            # หลอดพลังงาน (Stamina)
+            StatusGauge:
+                id: stamina_box
+                label_text: "Stamina"
+                val: app.stamina
+                color: 0.2, 0.6, 0.8, 1
 
-                # ----------------- หลอดการเจริญเติบโตแนวตั้ง (ขวา) -----------------
-                BoxLayout:
-                    id: growth_box
-                    orientation: 'vertical'
-                    size_hint: None, 0.6
-                    width: 60
-                    pos_hint: {'right': 0.98, 'center_y': 0.5}
-                    spacing: 10
-                    
-                    Label:
-                        text: "เติบโต"
-                        font_name: 'assets/fonts/font.ttf'
-                        font_size: '18sp'
-                        size_hint_y: None
-                        height: 30
-                        canvas.before:
-                            Color:
-                                rgba: 0, 0, 0, 0.5
-                            RoundedRectangle:
-                                pos: self.pos
-                                size: self.size
-                                radius: [5,]
-                    VerticalProgressBar:
-                        id: growth_bar
-                        max: root.phase_limit
-                        value: root.growth_score
-                        bar_color: 0.2, 0.8, 0.2, 1 # สีเขียวสำหรับต้นไม้
+            # หลอดเอาใจใส่ (Affection)
+            StatusGauge:
+                id: care_box
+                label_text: "Affection"
+                val: root.satisfaction_score
+                color: 0.8, 0.2, 0.6, 1
 
-                Label:
-                    id: title_lbl
-                    text: "กำลังปลูก..."
-                    font_name: 'assets/fonts/font.ttf'
-                    font_size: '22sp'
-                    size_hint_y: None
-                    height: 40
-                    size_hint_x: 0.4
-                    pos_hint: {'center_x': 0.5, 'top': 0.88}
-                    canvas.before:
-                        Color:
-                            rgba: 0, 0, 0, 0.5
-                        RoundedRectangle:
-                            pos: self.pos
-                            size: self.size
-                            radius: [10,]
+            # หลอดเติบโต (Growth)
+            StatusGauge:
+                id: growth_box
+                label_text: "Growth"
+                val: root.growth_score
+                max_v: root.phase_limit
+                color: 0.2, 0.8, 0.2, 1
+
+        # 4. แผงปุ่ม Action (จัดไว้ล่างสุดของ KV เพื่อให้เลเยอร์อยู่ด้านหน้าสุด)
+        BoxLayout:
+            id: action_panel
+            orientation: 'vertical'
+            size_hint: 0.96, 0.3
+            pos_hint: {'center_x': 0.5, 'y': 0.01}
+            padding: [15, 10]
+            spacing: 8
+            canvas.before:
+                Color:
+                    rgba: 0.96, 0.94, 0.88, 0.85
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [25]
+            # ป้ายแสดงผลลัพธ์
+            Label:
+                id: result_lbl
+                text: "รอดูผลการดูแล..."
+                font_name: 'assets/fonts/font.ttf'
+                font_size: '18sp'
+                color: 0.2, 0.2, 0.2, 1 
+                size_hint_y: 0.25
+
+            # ส่วนปุ่มกดแบบแนวนอน
+            BoxLayout:
+                size_hint_y: 0.75
+                orientation: 'horizontal'
+                spacing: 10
                 
-                RelativeLayout:
-                    size_hint: None, None
-                    size: 300, 300
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-
-                    Scatter:
-                        id: flower_scatter
-                        size: 300, 300
-                        pos: 0, 0
-                        do_rotation: False
-                        do_translation: False
-                        auto_bring_to_front: False
-                        scale_min: 0.5
-                        scale_max: 3.0
-                        
-                        Image:
-                            id: aura_glow
-                            source: "assets/images/aura_effect.png"
-                            size: flower_scatter.size
-                            fit_mode: "contain"
-                            opacity: min(root.extra_affection / 100.0, 1.0) if getattr(root, 'current_phase', 1) == 4 else 0
-                            
-                        Image:
-                            id: flower_img
-                            source: root.flower_image_source
-                            size: flower_scatter.size
-                            fit_mode: "contain"
-
-                Label:
-                    id: result_lbl
-                    text: "รอดูผลการดูแล..."
-                    font_name: 'assets/fonts/font.ttf'
-                    font_size: '20sp'
-                    size_hint_y: None
-                    height: 80
-                    size_hint_x: 0.8
-                    pos_hint: {'center_x': 0.5, 'y': 0}
-                    text_size: self.width, None
-                    halign: 'center'
-                    valign: 'middle'
-                    canvas.before:
-                        Color:
-                            rgba: 0, 0, 0, 0.5
-                        RoundedRectangle:
-                            pos: self.pos
-                            size: self.size
-                            radius: [10,]
-
-            # ปรับเปลี่ยนปุ่มเมื่อโตเต็มที่
-            FloatLayout:
-                size_hint_y: 0.2
-
-                # ปุ่มกดแบบ Minimal ปกติ
+                # ตารางปุ่มหลัก
                 GridLayout:
+                    id: main_actions
                     cols: 3
-                    size_hint: 1, 1
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.5} if root.current_phase < 4 else {'top': 2.0}
-                    spacing: 15
+                    spacing: 12
+                    size_hint_x: 1 if root.current_phase < 4 else 0.001
                     opacity: 1 if root.current_phase < 4 else 0
                     disabled: root.current_phase >= 4
                     
-                    Button:
+                    MinimalButton:
                         text: "รดน้ำ"
-                        font_name: 'assets/fonts/font.ttf'
-                        font_size: '20sp'
-                        background_normal: '' 
-                        background_color: 0.2, 0.5, 0.8, 0.8
+                        btn_color: 0.2, 0.5, 0.8, 1
                         on_release: root.water_plant()
-                    Button:
+                    MinimalButton:
                         text: "ใส่ปุ๋ย"
-                        font_name: 'assets/fonts/font.ttf'
-                        font_size: '20sp'
-                        background_normal: '' 
-                        background_color: 0.8, 0.6, 0.2, 0.8
+                        btn_color: 0.8, 0.6, 0.2, 1
                         on_release: root.fertilize_plant()
-                    Button:
+                    MinimalButton:
                         text: "พรวนดิน"
-                        font_name: 'assets/fonts/font.ttf'
-                        font_size: '20sp'
-                        background_normal: '' 
-                        background_color: 0.6, 0.4, 0.2, 0.8
+                        btn_color: 0.6, 0.4, 0.2, 1
                         on_release: root.till_soil()
-                    Button:
+                    MinimalButton:
                         text: "พักผ่อน"
-                        font_name: 'assets/fonts/font.ttf'
-                        font_size: '20sp'
-                        background_normal: '' 
-                        background_color: 0.2, 0.7, 0.5, 0.8
+                        btn_color: 0.2, 0.7, 0.5, 1
                         on_release: root.next_day_action()
-                    Button:
+                    MinimalButton:
                         text: "ออกชั่วคราว"
-                        font_name: 'assets/fonts/font.ttf'
-                        font_size: '20sp'
-                        background_normal: '' 
-                        background_color: 0.5, 0.5, 0.5, 0.8
+                        btn_color: 0.5, 0.5, 0.5, 1
                         on_release: root.temp_exit()
-                        on_press: app.play_click()
-                    Button:
+                    MinimalButton:
                         text: "ยอมแพ้"
-                        font_name: 'assets/fonts/font.ttf'
-                        font_size: '20sp'
-                        background_normal: '' 
-                        background_color: 0.8, 0.3, 0.3, 0.8
+                        btn_color: 0.8, 0.3, 0.3, 1
                         on_release: root.give_up()
-                        on_press: app.play_click()
 
-                # ปุ่มเก็บเกี่ยว (แสดงเมื่อ 100%)
-                Button:
+                # ปุ่มเก็บเกี่ยว (แยกออกมาเป็นอิสระ)
+                MinimalButton:
+                    id: collect_btn
                     text: "ย้ายกระถางดอกไม้!"
-                    font_name: 'assets/fonts/font.ttf'
-                    font_size: '24sp'
-                    size_hint: 0.8, 0.8
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.5} if root.current_phase >= 4 else {'top': 2.0}
-                    background_normal: '' 
-                    background_color: 0.8, 0.6, 0.2, 0.9 # สีทอง
+                    size_hint_x: 0.9 if root.current_phase >= 4 else 0.001
                     opacity: 1 if root.current_phase >= 4 else 0
                     disabled: root.current_phase < 4
+                    btn_color: 0.8, 0.6, 0.2, 1
                     on_release: root.collect_flower()
 
-        # Tooltip สำหรับ Hover พลังงาน
+        # 5. Tooltip (คงเดิมไว้)
         Label:
             id: tooltip_lbl
             text: ""
@@ -472,7 +393,7 @@ WindowManager:
             font_size: '18sp'
             size_hint: None, None
             size: self.texture_size[0] + 20, self.texture_size[1] + 10
-            pos: 0, -100 # ซ่อนไว้นอกจอก่อน
+            pos: 0, -100
             opacity: 0
             canvas.before:
                 Color:
