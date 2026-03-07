@@ -627,15 +627,31 @@ WindowManager:
                 size_hint_y: None
                 height: 40
                 
-            Slider:
-                id: master_volume
-                min: 0.0
-                max: 1.0
-                value: app.music_volume
+            # ---> เริ่มส่วนที่ปรับแก้: จับมัดปุ่มและหลอดเสียงให้อยู่บรรทัดเดียวกัน <---
+            BoxLayout:
+                orientation: 'horizontal'
                 size_hint_y: None
-                height: 50
-                on_value: root.on_volume_change(*args)
+                height: 100
+                spacing: 15
                 
+                Button:
+                    size_hint_x: None
+                    width: 100
+                    # ดึงรูปมาจากตัวแปร speaker_icon ในไฟล์ python
+                    background_normal: root.speaker_icon
+                    background_down: root.speaker_icon
+                    # ส่ง id ของหลอดเสียงไปให้ฟังก์ชันทำงาน
+                    on_release: root.toggle_mute(master_volume)
+                    
+                Slider:
+                    id: master_volume
+                    min: 0.0
+                    max: 1.0
+                    value: app.music_volume
+                    # เปลี่ยนจาก *args เป็น (self, self.value) ให้ตรงกับฟังก์ชันใน python
+                    on_value: root.on_volume_change(self, self.value)
+            # ---> จบส่วนที่ปรับแก้ <---
+                    
             Widget:
                 size_hint_y: 1
                 
