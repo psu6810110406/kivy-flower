@@ -292,24 +292,31 @@ WindowManager:
             # หลอดพลังงาน (Stamina)
             StatusGauge:
                 id: stamina_box
-                label_text: "Stamina"
+                label_text: "พลังงาน"
                 val: app.stamina
                 color: 0.2, 0.6, 0.8, 1
 
             # หลอดเอาใจใส่ (Affection)
             StatusGauge:
                 id: care_box
-                label_text: "Affection"
+                label_text: "ความเอาใจใส่"
                 val: root.satisfaction_score
                 color: 0.8, 0.2, 0.6, 1
 
             # หลอดเติบโต (Growth)
             StatusGauge:
                 id: growth_box
-                label_text: "Growth"
+                label_text: "การเจริญเติบโต"
                 val: root.growth_score
                 max_v: root.phase_limit
                 color: 0.2, 0.8, 0.2, 1
+
+            # หลอดที่ 4: พลังชีวิต (Health)
+            StatusGauge:
+                id: health_box
+                label_text: "สุขภาพของดอกไม้"
+                val: root.health_score
+                color: 1, 0, 0, 1 
 
         # 4. แผงปุ่ม Action (จัดไว้ล่างสุดของ KV เพื่อให้เลเยอร์อยู่ด้านหน้าสุด)
         BoxLayout:
