@@ -25,6 +25,8 @@ class GameScreen(Screen):
     phase_limit = NumericProperty(100)
     satisfaction_score = NumericProperty(100)
     health_score = NumericProperty(100)
+    neglect_streak = NumericProperty(0)
+    action_today = False
     
     
     def __init__(self, **kwargs):
@@ -39,23 +41,30 @@ class GameScreen(Screen):
         if not self.parent or self.parent.current != self.name:
             return
         
-        # ถ่ายทอดตำแหน่งเมาส์ในหน้าต่างไปยัง Widget เพื่อเช็คแรงเงา
+        # แปลงพิกัดจากหน้าต่างเป็นพิกัด Widget
+        local_pos = self.to_widget(*pos)
+        
         stamina_box = self.ids.stamina_box
         growth_box = self.ids.get('growth_box')
         care_box = self.ids.get('care_box')
+        health_box = self.ids.get('health_box')
 
-        if stamina_box.collide_point(*pos):
+        if stamina_box.collide_point(*local_pos):
             self.ids.tooltip_lbl.opacity = 1
             self.ids.tooltip_lbl.pos = (pos[0] + 15, pos[1] + 15)
             self.ids.tooltip_lbl.text = f"พลังงานเหลือ: {App.get_running_app().stamina} / 100"
-        elif care_box and care_box.collide_point(*pos):
+        elif care_box and care_box.collide_point(*local_pos):
             self.ids.tooltip_lbl.opacity = 1
             self.ids.tooltip_lbl.pos = (pos[0] + 15, pos[1] + 15)
-            self.ids.tooltip_lbl.text = f"ความเอาใจใส่: {self.satisfaction_score} / 100"
-        elif growth_box and growth_box.collide_point(*pos):
+            self.ids.tooltip_lbl.text = f"ความเอาใจใส่: {int(self.satisfaction_score)} / 100"
+        elif growth_box and growth_box.collide_point(*local_pos):
             self.ids.tooltip_lbl.opacity = 1
             self.ids.tooltip_lbl.pos = (pos[0] - self.ids.tooltip_lbl.width - 15, pos[1] + 15)
             self.ids.tooltip_lbl.text = f"ความเติบโต: {self.growth_score:.1f} / {self.phase_limit}"
+        elif health_box and health_box.collide_point(*local_pos):
+            self.ids.tooltip_lbl.opacity = 1
+            self.ids.tooltip_lbl.pos = (pos[0] + 15, pos[1] + 15)
+            self.ids.tooltip_lbl.text = f"พลังชีวิต: {int(self.health_score)} / 100"
         else:
             self.ids.tooltip_lbl.opacity = 0
 
@@ -68,17 +77,22 @@ class GameScreen(Screen):
         
         # ฟื้นฟูความก้าวหน้าถ้าเคยปลูกไว้
         self.watered_today = False
+        self.action_today = False
         if self.current_flower in app.flower_progress:
             progress_data = app.flower_progress[self.current_flower]
             # รองรับเซฟเก่าที่เป็นตัวเลข
             if isinstance(progress_data, (int, float)):
                 self.growth_score = progress_data
                 self.satisfaction_score = 100
+                self.health_score = 100
+                self.neglect_streak = 0
                 self.current_phase = 1
                 self.care_days = 0
             else:
                 self.growth_score = progress_data.get("growth_score", 0)
                 self.satisfaction_score = progress_data.get("satisfaction_score", 100)
+                self.health_score = progress_data.get("health_score", 100)
+                self.neglect_streak = progress_data.get("neglect_streak", 0)
                 self.current_phase = progress_data.get("current_phase", 1)
                 self.care_days = progress_data.get("care_days", 0)
 
@@ -91,9 +105,12 @@ class GameScreen(Screen):
 
     def reset_game(self):
         self.watered_today = False
+        self.action_today = False
         self.current_phase = 1
         self.growth_score = 0
         self.satisfaction_score = 100
+        self.health_score = 100
+        self.neglect_streak = 0
         self.care_days = 0
         self.phase_limit = self.get_phase_limit()
         self.flower_image_source = self.get_flower_image(0)
@@ -106,6 +123,8 @@ class GameScreen(Screen):
         app.flower_progress[self.current_flower] = {
             "growth_score": self.growth_score,
             "satisfaction_score": self.satisfaction_score,
+            "health_score": self.health_score,
+            "neglect_streak": self.neglect_streak,
             "current_phase": self.current_phase,
             "care_days": self.care_days
         }
@@ -147,6 +166,7 @@ class GameScreen(Screen):
     # Action Callbacks ตอบสนองต่อปุ่ม
     def water_plant(self):
         print("Action: water_plant called")
+        self.action_today = True
         app = App.get_running_app()
         if self.current_phase >= 4 and self.satisfaction_score >= 100:
             self.satisfaction_score += 10
@@ -180,6 +200,7 @@ class GameScreen(Screen):
 
     def fertilize_plant(self):
         print("Action: fertilize_plant called")
+        self.action_today = True
         app = App.get_running_app()
         if self.current_phase >= 4: return
         if app.stamina >= 20:
@@ -194,6 +215,7 @@ class GameScreen(Screen):
 
     def till_soil(self):
         print("Action: till_soil called")
+        self.action_today = True
         app = App.get_running_app()
         if self.current_phase >= 4: return
         if app.stamina >= 15:
@@ -211,14 +233,14 @@ class GameScreen(Screen):
         if self.satisfaction_score <= 0:
             penalty = 20 # หักพลังชีวิตครั้งละ 20
             self.health_score = max(0, self.health_score - penalty)
-            self.result_lbl.text = f"ดอกไม้ขาดการดูแล! พลังชีวิตลดลง {penalty}%"
+            self.ids.result_lbl.text = f"ดอกไม้ขาดการดูแล! พลังชีวิตลดลง {penalty}%"
             
             # เช็คเงื่อนไขความตาย
             if self.health_score <= 0:
                 self.trigger_death()
 
     def trigger_death(self):
-        self.result_lbl.text = "เสียใจด้วย... ดอกไม้ของคุณตายแล้ว"
+        self.ids.result_lbl.text = "เสียใจด้วย... ดอกไม้ของคุณตายแล้ว"
         self.show_death_alert() # เรียกชื่อให้ตรงกับข้างล่าง
 
     def show_death_alert(self):
@@ -350,16 +372,48 @@ class GameScreen(Screen):
         # เช็คว่าลืมรดน้ำในวันแดดจัดไหม
         yesterday_weather = app.weather
         penalty = self.get_phase_penalty()
-        if yesterday_weather == "แดดจัด" and getattr(self, "watered_today", False) == False:
+        
+        is_neglected = False
+        neglect_detail = ""
+        
+        # 1. หักถ้าปล่อยให้ต้นขาดน้ำในวันที่แดดออก
+        if yesterday_weather == "แดดจัด" and not getattr(self, "watered_today", False):
             self.satisfaction_score = max(0, self.satisfaction_score - penalty)
-            penalty_msg = f"[color=FF5252]โดนหัก {penalty} แต้ม! (ปล่อยให้ต้นไม้ร้อนในวันแดดจัด)[/color]"
+            neglect_detail += f"ขาดน้ำในวันแดดจัด (-{penalty}) "
+            is_neglected = True
+        
+        # 2. หักถ้าไม่ทำอะไรเลย
+        if not getattr(self, "action_today", False):
+            neglect_detail += "ไม่ได้ดูแลดอกไม้เลย (-15) "
+            is_neglected = True
+            
+        if is_neglected:
+            self.neglect_streak += 1
+            penalty_msg = f"[color=FF5252]ละเลยการดูแล: {neglect_detail}[/color]"
         else:
+            self.neglect_streak = 0
             penalty_msg = "[color=A5D6A7]ดูแลได้ดีมาก ราบรื่น![/color]"
             
+        # Passive Decay: หักค่าความเอาใจใส่ 15 ทุกวัน
+        self.satisfaction_score = max(0, self.satisfaction_score - 15)
+        
+        # หักพลังชีวิตโดยตรงถ้าละเลยติดต่อกัน 3 วัน
+        if self.neglect_streak >= 3:
+            self.health_score = max(0, self.health_score - 30)
+            penalty_msg += "\n[color=FF4444]ละเลยติดต่อกัน 3 วัน! พลังชีวิตลดฮวบ 30%[/color]"
+            
+        self.apply_penalty() # ตรวจสอบเงื่อนไขสุขภาพ
+        
+        if self.health_score <= 0:
+            return # ไม่ต้องเปิด popup สรุปวันถ้าตายแล้ว (trigger_death จะเรียก popup เอง)
+
         self.watered_today = False
+        self.action_today = False
         self.care_days += 1
         
-        app.stamina = 100
+        # เพิ่มพลังงาน 40 แต่ไม่ให้เกิน 100
+        app.stamina = min(100, app.stamina + 40)
+        
         weathers = ["แดดจัด", "ฝนตก", "เมฆมาก", "พายุเข้า"]
         app.weather = random.choice(weathers)
         
@@ -371,11 +425,11 @@ class GameScreen(Screen):
         ))
         content.add_widget(Label(
             text=penalty_msg,
-            markup=True, font_name='assets/fonts/font.ttf', font_size='20sp'
+            markup=True, font_name='assets/fonts/font.ttf', font_size='18sp', halign='center'
         ))
         content.add_widget(Label(
-            text=f"พยากรณ์อากาศวันนี้: [b]{app.weather}[/b]\n(พลังงานฟื้นฟูเต็ม 100 แล้ว!)",
-            markup=True, font_name='assets/fonts/font.ttf', font_size='22sp'
+            text=f"พยากรณ์อากาศวันนี้: [b]{app.weather}[/b]\n(พลังงานฟื้นฟูพื้นฐาน +40 แล้ว!)",
+            markup=True, font_name='assets/fonts/font.ttf', font_size='22sp', halign='center'
         ))
         btn = Button(
             text="ลุยกันต่อ!",
