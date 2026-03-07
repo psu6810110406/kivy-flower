@@ -35,6 +35,7 @@ class GameScreen(Screen):
         # ผูก property ข้ามเฟส
         self.bind(current_phase=self.on_phase_change)
         
+        self.action_cooldown = False # ป้องกันการกดรัว
         Window.bind(mouse_pos=self.on_mouse_pos)
 
     def on_mouse_pos(self, window, pos):
@@ -186,9 +187,14 @@ class GameScreen(Screen):
 
     # Action Callbacks ตอบสนองต่อปุ่ม
     def water_plant(self):
+        if self.action_cooldown: return
         print("Action: water_plant called")
         self.action_today = True
         app = App.get_running_app()
+        
+        # เริ่ม Cooldown
+        self.start_cooldown(0.3)
+        
         if self.current_phase >= 4 and self.satisfaction_score >= 100:
             self.satisfaction_score += 10
             self.update_status(f"หมั่นรดน้ำให้ต้นไม้ที่บานแล้ว! (+10 เอาใจใส่)")
@@ -211,43 +217,70 @@ class GameScreen(Screen):
             self.growth_score += bonus
             
             sc = self.ids.flower_scatter
-            anim = Animation(scale=sc.scale * 1.2, duration=0.1) + Animation(scale=sc.scale, duration=0.1)
+            # แก้ไข: ใช้ค่า Scale สัมบูรณ์ (1.2 และ 1.0) แทนการคูณค่าปัจจุบัน เพื่อป้องกันดอกไม้ขยายใหญ่เกินคุม
+            Animation.stop_all(sc) # หยุดเอนิเมชันเก่าทันที
+            anim = Animation(scale=1.15, duration=0.1, t='out_quad') + Animation(scale=1.0, duration=0.1, t='in_quad')
             anim.start(sc)
             
-            # check_phase_up() ถูกเรียกอัตโนมัติผ่าน on_growth_score / on_satisfaction_score
             app.save_app_state()
         else:
             self.update_status("พลังงานไม่พอ! กดยอมพักผ่อนได้แล้ว")
 
     def fertilize_plant(self):
+        if self.action_cooldown: return
         print("Action: fertilize_plant called")
         self.action_today = True
         app = App.get_running_app()
         if self.current_phase >= 4: return
+        
+        self.start_cooldown(0.3)
+        
         if app.stamina >= 20:
             app.stamina -= 20
             self.growth_score += 30
             self.satisfaction_score += 15
             self.update_status("ใส่ปุ๋ยบำรุงขั้นสุด! (+30 เติบโต | +15 เอาใจใส่ | -20 พลังงาน)")
-            # check_phase_up() ถูกเรียกอัตโนมัติผ่าน on_growth_score / on_satisfaction_score
+            
+            # ใส่เอนิเมชันเด้งเล็กน้อย
+            sc = self.ids.flower_scatter
+            Animation.stop_all(sc)
+            (Animation(scale=1.1, duration=0.1) + Animation(scale=1.0, duration=0.1)).start(sc)
+            
             app.save_app_state()
         else:
             self.update_status("พลังงานไม่พอ! กดยอมพักผ่อนได้แล้ว")
 
     def till_soil(self):
+        if self.action_cooldown: return
         print("Action: till_soil called")
         self.action_today = True
         app = App.get_running_app()
         if self.current_phase >= 4: return
+        
+        self.start_cooldown(0.3)
+        
         if app.stamina >= 15:
             app.stamina -= 15
             self.growth_score += 20
             self.satisfaction_score += 10
             self.update_status("พรวนดินร่วนซุยดีมาก (+20 เติบโต | +10 เอาใจใส่ | -15 พลังงาน)")
-            # check_phase_up() ถูกเรียกอัตโนมัติผ่าน on_growth_score / on_satisfaction_score
+            
+            # ใส่เอนิเมชันเด้งเล็กน้อย
+            sc = self.ids.flower_scatter
+            Animation.stop_all(sc)
+            (Animation(scale=1.1, duration=0.1) + Animation(scale=1.0, duration=0.1)).start(sc)
+            
             app.save_app_state()
         else:
             self.update_status("พลังงานไม่พอ! กดยอมพักผ่อนได้แล้ว")
+
+    def start_cooldown(self, duration):
+        from kivy.clock import Clock
+        self.action_cooldown = True
+        Clock.schedule_once(self.end_cooldown, duration)
+
+    def end_cooldown(self, dt):
+        self.action_cooldown = False
 
     def on_growth_score(self, instance, value):
         self.check_phase_up()
