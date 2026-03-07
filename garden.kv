@@ -45,31 +45,57 @@ WindowManager:
 
 <DeathPopupContent@BoxLayout>:
     orientation: 'vertical'
-    padding: 20
-    spacing: 15
+    padding: [30, 40, 30, 30]
+    spacing: 25
     canvas.before:
         Color:
             rgba: 0.96, 0.94, 0.88, 1 # สีครีมมินิมอล
         RoundedRectangle:
             pos: self.pos
             size: self.size
-            radius: [20]
+            radius: [25]
+        # เส้นขอบบางๆ เพื่อความสวยงาม
+        Color:
+            rgba: 1, 1, 1, 0.1
+        Line:
+            width: 1.2
+            rounded_rectangle: (self.x, self.y, self.width, self.height, 25)
+
     Label:
         text: "GAME OVER"
         font_name: 'assets/fonts/font.ttf'
-        font_size: '30sp'
-        color: 0.8, 0.2, 0.2, 1
+        font_size: '48sp'  # ขนาดใหญ่สื่อความหมายทันที
+        color: 0.8, 0.2, 0.2, 1  # สีแดงสด (Red)
+        bold: True
+        size_hint_y: None
+        height: 80
+
     Label:
-        text: "[color=ff4444]🥀 ดอกไม้ของคุณตายแล้ว[/color]\n\nเนื่องจากขาดการเอาใจใส่จนพลังชีวิตหมดลง"
-        markup: True
+        text: "ดอกไม้ของคุณเหี่ยวเฉาลงแล้ว...\nเนื่องจากขาดการเอาใจใส่จนพลังชีวิตหมดลง"
         font_name: 'assets/fonts/font.ttf'
+        font_size: '18sp'
+        color: 0.1, 0.1, 0.1, 1  # สีดำเข้มตามความต้องการ
         halign: 'center'
-    Button:
-        text: "กลับไปเริ่มใหม่"
-        size_hint: (1, 0.3)
-        background_color: (0.8, 0.3, 0.3, 1)
-        font_name: 'assets/fonts/font.ttf'
-        font_size: '20sp'
+        valign: 'middle'
+        text_size: self.width, None
+
+    BoxLayout:
+        orientation: 'horizontal'
+        spacing: 15
+        size_hint_y: None
+        height: 60
+
+        MinimalButton:
+            id: retry_btn
+            text: "ปลูกใหม่"
+            btn_color: 0.2, 0.4, 0.9, 1  # ปุ่มหลัก: สีน้ำเงินสด (Primary Action)
+            on_press: app.play_click()
+
+        MinimalButton:
+            id: home_btn
+            text: "ออกจากการปลูก"
+            btn_color: 0.4, 0.5, 0.4, 1  # ปุ่มรอง: สีเทาอมเขียว (Secondary Action)
+            on_press: app.play_click()
 
 # ----------------- หน้า 1: เมนูหลัก -----------------
 <MenuScreen>:
@@ -265,7 +291,7 @@ WindowManager:
         RelativeLayout:
             size_hint: None, None
             size: 600, 600
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            pos_hint: {'center_x': 0.5, 'center_y': 0.58} # เลื่อนขึ้นประมาณ 40-50 พิกเซล (0.08 ของจอ)
 
             # ป้ายชื่อ (ลอยอยู่เหนือหัวดอกไม้)
             Label:
@@ -294,12 +320,30 @@ WindowManager:
                     id: aura_glow
                     source: "assets/images/aura_effect.png"
                     size: self.parent.size
-                    opacity: min(root.extra_affection / 100.0, 1.0) if getattr(root, 'current_phase', 1) == 4 else 0
+                    opacity: min(root.extra_affection / 100.0, 1.0) # แสดงออร่าตามค่าความเอาใจใส่ที่เกินมา 100 โดยไม่จำกัดเฟส
                 Image:
                     id: flower_img
                     source: root.flower_image_source
                     size: self.parent.size
                     fit_mode: "contain"
+
+        # ป้ายบอกวันที่ (Day Counter) อยู่มุมขวาบน
+        Label:
+            text: f"วันที่: {root.care_days + 1}"
+            font_name: 'assets/fonts/font.ttf'
+            font_size: '20sp'
+            size_hint: None, None
+            size: 110, 45
+            pos_hint: {'right': 0.98, 'top': 0.98}
+            color: 1, 1, 1, 1
+            bold: True
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 0.6
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [10]
 
         # 3. แถบ HUD ด้านซ้าย (รวบหลอดสถานะทั้งหมด)
         BoxLayout:
@@ -356,7 +400,7 @@ WindowManager:
             spacing: 8
             canvas.before:
                 Color:
-                    rgba: 0.96, 0.94, 0.88, 0.85
+                    rgba: 0.96, 0.94, 0.88, 1 # สีครีมทึบ ไม่มองทะลุพื้นหลัง
                 RoundedRectangle:
                     pos: self.pos
                     size: self.size

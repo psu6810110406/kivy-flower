@@ -137,13 +137,16 @@ class GameScreen(Screen):
         elif state == 1:
             return "assets/images/sprout.png"
             
-        path = f"assets/images/{self.current_flower}_{state}.png"
+        # ตรวจสอบทั้ง .png และ .PNG
+        path_lower = f"assets/images/{self.current_flower}_{state}.png"
+        path_upper = f"assets/images/{self.current_flower}_{state}.PNG"
 
-        import os
-        
-        if os.path.exists(path):
-            return path
-        return f"assets/images/flower_{state}.png"
+        if os.path.exists(path_lower):
+            return path_lower
+        if os.path.exists(path_upper):
+            return path_upper
+            
+        return f"assets/images/seed.png"  # Fallback พื้นฐานที่สุด
 
     def on_phase_change(self, instance, value):
         self.flower_image_source = self.get_flower_image(value - 1)
@@ -159,9 +162,9 @@ class GameScreen(Screen):
 
     @property
     def extra_affection(self):
-        if self.current_phase == 4:
-            return max(0, self.satisfaction_score - 100)
-        return 0
+        # ให้ค่าออร่าแสดงผลตามความเอาใจใส่ที่เกิน 100 (เหมือนระบบ Growth) 
+        # โดยไม่ต้องรอให้ถึง Phase 4 เพื่อให้เห็นพัฒนาการ
+        return max(0, self.satisfaction_score - 100)
 
     # Action Callbacks ตอบสนองต่อปุ่ม
     def water_plant(self):
@@ -185,7 +188,7 @@ class GameScreen(Screen):
             else:
                 bonus = 30 if app.weather == "แดดจัด" else 15
                 self.satisfaction_score += 5
-                self.update_status(f"รดน้ำลูบใบ (+{bonus} เติบโต | +5 พึงพอใจ | -10 พลังงาน)")
+                self.update_status(f"รดน้ำต้นไม้ (+{bonus} เติบโต | +5 เอาใจใส่ | -10 พลังงาน)")
             
             self.growth_score += bonus
             
@@ -207,7 +210,7 @@ class GameScreen(Screen):
             app.stamina -= 20
             self.growth_score += 30
             self.satisfaction_score += 15
-            self.update_status("ใส่ปุ๋ยบำรุงขั้นสุด! (+30 เติบโต | +15 พึงพอใจ | -20 พลังงาน)")
+            self.update_status("ใส่ปุ๋ยบำรุงขั้นสุด! (+30 เติบโต | +15 เอาใจใส่ | -20 พลังงาน)")
             self.check_phase_up()
             app.save_app_state()
         else:
@@ -222,7 +225,7 @@ class GameScreen(Screen):
             app.stamina -= 15
             self.growth_score += 20
             self.satisfaction_score += 10
-            self.update_status("พรวนดินร่วนซุยดีมาก (+20 เติบโต | +10 พึงพอใจ | -15 พลังงาน)")
+            self.update_status("พรวนดินร่วนซุยดีมาก (+20 เติบโต | +10 เอาใจใส่ | -15 พลังงาน)")
             self.check_phase_up()
             app.save_app_state()
         else:
@@ -241,51 +244,48 @@ class GameScreen(Screen):
 
     def trigger_death(self):
         self.ids.result_lbl.text = "เสียใจด้วย... ดอกไม้ของคุณตายแล้ว"
-        self.show_death_alert() # เรียกชื่อให้ตรงกับข้างล่าง
+        self.show_death_alert()
 
     def show_death_alert(self):
-        # 1. ดึงเนื้อหาจาก KV มา
+        # 1. ดึงเนื้อหาจาก KV
+        from kivy.factory import Factory
         content = Factory.DeathPopupContent()
         
-        # 2. สร้างปุ่ม Reset/กลับหน้าหลัก ด้วย Python
-        reset_btn = Button(
-            text="กลับไปเริ่มใหม่",
-            size_hint=(1, 0.4),
-            background_color=(0.8, 0.3, 0.3, 1), # สีแดงนวลๆ
-            font_name='assets/fonts/font.ttf'
-        )
-        
-        # 3. สร้างตัวแปร popup ไว้ก่อนเพื่อให้ปุ่มเรียกใช้งานได้
+        # 2. สร้าง Popup โดยเอาพื้นหลังออกเพื่อให้เห็นดีไซน์จาก Content ชัดเจน
         popup = Popup(
-            title="GAME OVER", 
+            title="", 
             content=content,
-            size_hint=(0.8, 0.5),
+            size_hint=(0.85, 0.55),
             auto_dismiss=False,
-            separator_height=0
+            separator_height=0,
+            background='',  # เอา default background ออก
+            background_color=(0, 0, 0, 0) # โปร่งใส
         )
 
-        # 4. กำหนดการทำงานให้ปุ่ม (ปิด Popup และรีเซ็ตค่า)
-        reset_btn.bind(on_release=lambda x: self.reset_game_logic(popup))
-        
-        # 5. ใส่ปุ่มลงไปใน content (BoxLayout จาก KV)
-        content.add_widget(reset_btn)
+        # 3. เชื่อมต่อ Logic ผ่าน IDs ที่เราตั้งไว้ใน KV
+        # ปุ่มหลัก: "ปลูกใหม่" (Reset game and stay)
+        content.ids.retry_btn.bind(on_release=lambda x: self.reset_game_logic(popup))
+        # ปุ่มรอง: "ออกจากการปลูก" (Go to menu)
+        content.ids.home_btn.bind(on_release=lambda x: self.exit_to_menu(popup))
         
         popup.open()
 
     def reset_game_logic(self, popup):
         popup.dismiss()
-        
         # รีเซ็ตค่าตัวแปรต่างๆ กลับเป็นค่าเริ่มต้น
-        self.health_score = 100
-        self.satisfaction_score = 100
-        self.growth_score = 0
-        self.current_phase = 1
-        
-        # ส่งผู้เล่นกลับไปหน้าเมนูหรือหน้าเลือกเลเวล
-        self.manager.current = 'menu'
-        
+        self.reset_game()
         # บันทึกสถานะที่รีเซ็ตแล้วลงไฟล์
         app = App.get_running_app()
+        app.save_app_state()
+
+    def exit_to_menu(self, popup):
+        popup.dismiss()
+        # ส่งผู้เล่นกลับไปหน้าเมนู
+        self.manager.current = 'menu'
+        # บันทึกสถานะ และอาจจะลบโปรเกรสของดอกไม้ตัวที่ตายไปแล้วเพื่อให้เริ่มใหม่ได้จากหน้าเลือกเลเวล
+        app = App.get_running_app()
+        if self.current_flower in app.flower_progress:
+            del app.flower_progress[self.current_flower]
         app.save_app_state()
 
     def update_status(self, msg):
@@ -315,42 +315,6 @@ class GameScreen(Screen):
                 del app.flower_progress[self.current_flower]
             app.save_app_state()
             print("You won!")   
-
-    def show_death_popup(self):
-        layout = BoxLayout(orientation='vertical', padding=20, spacing=10)
-        
-        # ข้อความแจ้งเตือน
-        message = Label(
-            text="[color=ff4444]🥀 ดอกไม้ของคุณตายแล้ว[/color]\n\nเนื่องจากขาดการเอาใจใส่จนพลังชีวิตหมดลง",
-            markup=True,
-            font_name='assets/fonts/font.ttf',
-            halign='center'
-        )
-        
-        # ปุ่มกลับหน้าหลัก
-        btn = Button(
-            text="กลับไปเริ่มใหม่",
-            size_hint=(1, 0.3),
-            background_color=(0.8, 0.3, 0.3, 1)
-        )
-        
-        layout.add_widget(message)
-        layout.add_widget(btn)
-
-        popup = Popup(
-            title="Game Over",
-            content=layout,
-            size_hint=(0.8, 0.4),
-            auto_dismiss=False
-        )
-        
-        # เมื่อกดปุ่มให้ปิด Popup และเปลี่ยนหน้า
-        btn.bind(on_release=lambda x: self.reset_and_exit(popup))
-        popup.open()
-
-    def reset_and_exit(self, popup):
-        popup.dismiss()
-        self.manager.current = "menu" # หรือ "levels" เพื่อเลือกปลูกใหม่
 
     def give_up(self):
         self.reset_game()
@@ -411,8 +375,8 @@ class GameScreen(Screen):
         self.action_today = False
         self.care_days += 1
         
-        # เพิ่มพลังงาน 40 แต่ไม่ให้เกิน 100
-        app.stamina = min(100, app.stamina + 40)
+        # เพิ่มพลังงานเต็ม 100 ทุกครั้งที่พักผ่อน
+        app.stamina = 100
         
         weathers = ["แดดจัด", "ฝนตก", "เมฆมาก", "พายุเข้า"]
         app.weather = random.choice(weathers)
@@ -428,7 +392,7 @@ class GameScreen(Screen):
             markup=True, font_name='assets/fonts/font.ttf', font_size='18sp', halign='center'
         ))
         content.add_widget(Label(
-            text=f"พยากรณ์อากาศวันนี้: [b]{app.weather}[/b]\n(พลังงานฟื้นฟูพื้นฐาน +40 แล้ว!)",
+            text=f"พยากรณ์อากาศวันนี้: [b]{app.weather}[/b]\n(พลังงานฟื้นฟูพื้นฐาน +100 แล้ว!)",
             markup=True, font_name='assets/fonts/font.ttf', font_size='22sp', halign='center'
         ))
         btn = Button(
