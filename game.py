@@ -2,7 +2,7 @@
 import os
 from kivy.app import App
 from kivy.uix.screenmanager import Screen
-from kivy.properties import NumericProperty, StringProperty
+from kivy.properties import NumericProperty, StringProperty, ListProperty, BooleanProperty
 from kivy.animation import Animation
 from kivy.core.window import Window
 from kivy.uix.popup import Popup
@@ -10,11 +10,14 @@ from kivy.factory import Factory
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import NumericProperty
 from kivy.clock import Clock
 from kivy.core.audio import SoundLoader
-#from kivy.core.audio import SoundLoader
 
+class MinimalButton(Button):
+    btn_color = ListProperty([0, 0, 0, 1])
+    # กำหนดค่าเริ่มต้นให้เปิดเสียงคลิก
+    play_default_click = BooleanProperty(True)
+    
 class LevelScreen(Screen):
     pass
 
@@ -25,17 +28,21 @@ class GameScreen(Screen):
     care_days = NumericProperty(0)
     flower_image_source = StringProperty('')
     phase_limit = NumericProperty(100)
-    satisfaction_score = NumericProperty(100)
     health_score = NumericProperty(100)
     neglect_streak = NumericProperty(0)
     action_today = False
     
-    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.current_flower = ""
-        # ผูก property ข้ามเฟส
         
+        # --- โหลดไฟล์เสียงเตรียมไว้ล่วงหน้า เพื่อไม่ให้เกมกระตุกตอนกด ---
+        self.sound_water = SoundLoader.load('assets/sound/water.mp3')
+        self.sound_fertilizer = SoundLoader.load('assets/sound/fertilizer.mp3')
+        self.sound_till = SoundLoader.load('assets/sound/till.mp3')
+        self.sound_levelup = SoundLoader.load('assets/sound/levelup.mp3')
+        # ----------------------------------------------------
+
         self.action_cooldown = False # ป้องกันการกดรัว
         Window.bind(mouse_pos=self.on_mouse_pos)
 
@@ -197,6 +204,11 @@ class GameScreen(Screen):
         self.action_today = True
         app = App.get_running_app()
         
+        # --- เล่นเสียงรดน้ำ ---
+        if self.sound_water:
+            self.sound_water.play()
+        # --------------------
+        
         # เริ่ม Cooldown
         self.start_cooldown(0.3)
         
@@ -222,8 +234,8 @@ class GameScreen(Screen):
             self.growth_score += bonus
             
             sc = self.ids.flower_scatter
-            # แก้ไข: ใช้ค่า Scale สัมบูรณ์ (1.2 และ 1.0) แทนการคูณค่าปัจจุบัน เพื่อป้องกันดอกไม้ขยายใหญ่เกินคุม
-            Animation.stop_all(sc) # หยุดเอนิเมชันเก่าทันที
+            # แก้ไข: ใช้ค่า Scale สัมบูรณ์ (1.15 และ 1.0)
+            Animation.stop_all(sc) 
             anim = Animation(scale=1.15, duration=0.1, t='out_quad') + Animation(scale=1.0, duration=0.1, t='in_quad')
             anim.start(sc)
             
@@ -238,6 +250,11 @@ class GameScreen(Screen):
         app = App.get_running_app()
         if self.current_phase >= 4: return
         
+        # --- เล่นเสียงใส่ปุ๋ย ---
+        if self.sound_fertilizer:
+            self.sound_fertilizer.play()
+        # ---------------------
+
         self.start_cooldown(0.3)
         
         if app.stamina >= 20:
@@ -262,6 +279,11 @@ class GameScreen(Screen):
         app = App.get_running_app()
         if self.current_phase >= 4: return
         
+        # --- เล่นเสียงพรวนดิน ---
+        if self.sound_till:
+            self.sound_till.play()
+        # ---------------------
+
         self.start_cooldown(0.3)
         
         if app.stamina >= 15:
@@ -309,11 +331,9 @@ class GameScreen(Screen):
         self.show_death_alert()
 
     def show_death_alert(self):
-        # 1. ดึงเนื้อหาจาก KV
         from kivy.factory import Factory
         content = Factory.DeathPopupContent()
         
-        # 2. สร้าง Popup โดยเอาพื้นหลังออกเพื่อให้เห็นดีไซน์จาก Content ชัดเจน
         popup = Popup(
             title="", 
             content=content,
@@ -324,27 +344,20 @@ class GameScreen(Screen):
             background_color=(0, 0, 0, 0) # โปร่งใส
         )
 
-        # 3. เชื่อมต่อ Logic ผ่าน IDs ที่เราตั้งไว้ใน KV
-        # ปุ่มหลัก: "ปลูกใหม่" (Reset game and stay)
         content.ids.retry_btn.bind(on_release=lambda x: self.reset_game_logic(popup))
-        # ปุ่มรอง: "ออกจากการปลูก" (Go to menu)
         content.ids.home_btn.bind(on_release=lambda x: self.exit_to_menu(popup))
         
         popup.open()
 
     def reset_game_logic(self, popup):
         popup.dismiss()
-        # รีเซ็ตค่าตัวแปรต่างๆ กลับเป็นค่าเริ่มต้น
         self.reset_game()
-        # บันทึกสถานะที่รีเซ็ตแล้วลงไฟล์
         app = App.get_running_app()
         app.save_app_state()
 
     def exit_to_menu(self, popup):
         popup.dismiss()
-        # ส่งผู้เล่นกลับไปหน้าเมนู
         self.manager.current = 'menu'
-        # บันทึกสถานะ และอาจจะลบโปรเกรสของดอกไม้ตัวที่ตายไปแล้วเพื่อให้เริ่มใหม่ได้จากหน้าเลือกเลเวล
         app = App.get_running_app()
         if self.current_flower in app.flower_progress:
             del app.flower_progress[self.current_flower]
@@ -360,11 +373,10 @@ class GameScreen(Screen):
             self.growth_score = 0 
             self.satisfaction_score = 100 
             
-            # --- เพิ่มโค้ดเสียง Level Up ตรงนี้ ---
-            sound = SoundLoader.load('assets/sound/levelup.mp3') # ปรับ path ให้ตรงกับที่เก็บไฟล์จริง เช่น 'assets/sounds/levelup.mp3'
-            if sound:
-                sound.play()
-            # ---------------------------------
+            # --- เล่นเสียง Level Up ---
+            if self.sound_levelup:
+                self.sound_levelup.play()
+            # ------------------------
 
             if self.current_phase == 4:
                 self.update_status("ยินดีด้วย! ดอกไม้บานเต็มที่แล้ว มีออร่าพุ่งขึ้นมา! เก็บเกี่ยวได้เลย!")
@@ -376,7 +388,6 @@ class GameScreen(Screen):
     def collect_flower(self):
         if self.current_phase >= 4:
             app = App.get_running_app()
-            # เพิ่มดอกไม้ลงใน Collection พร้อมเก็บข้อมูลสถิติ
             flower_data = {
                 "type": self.current_flower,
                 "care_days": self.care_days,
@@ -384,7 +395,6 @@ class GameScreen(Screen):
             }
             app.unlocked_flowers.append(flower_data)
             self.update_status("เก็บเข้า Collection แล้ว!")
-            # กลับไปหน้าหลัก
             app.root.current = "menu"
             app.stamina += 30 # ได้โบนัสพลังงานคืน
             if self.current_flower in app.flower_progress:
@@ -492,13 +502,11 @@ class GameScreen(Screen):
         is_neglected = False
         neglect_detail = ""
         
-        # 1. หักถ้าปล่อยให้ต้นขาดน้ำในวันที่แดดออก
         if yesterday_weather == "แดดจัด" and not getattr(self, "watered_today", False):
             self.satisfaction_score = max(0, self.satisfaction_score - penalty)
             neglect_detail += f"ขาดน้ำในวันแดดจัด (-{penalty}) "
             is_neglected = True
         
-        # 2. หักถ้าไม่ทำอะไรเลย
         if not getattr(self, "action_today", False):
             neglect_detail += "ไม่ได้ดูแลดอกไม้เลย (-15) "
             is_neglected = True
@@ -510,30 +518,26 @@ class GameScreen(Screen):
             self.neglect_streak = 0
             penalty_msg = "[color=A5D6A7]ดูแลได้ดีมาก ราบรื่น![/color]"
             
-        # Passive Decay: หักค่าความเอาใจใส่ 15 ทุกวัน
         self.satisfaction_score = max(0, self.satisfaction_score - 15)
         
-        # หักพลังชีวิตโดยตรงถ้าละเลยติดต่อกัน 3 วัน
         if self.neglect_streak >= 3:
             self.health_score = max(0, self.health_score - 30)
             penalty_msg += "\n[color=FF4444]ละเลยติดต่อกัน 3 วัน! พลังชีวิตลดฮวบ 30%[/color]"
             
-        self.apply_penalty() # ตรวจสอบเงื่อนไขสุขภาพ
+        self.apply_penalty() 
         
         if self.health_score <= 0:
-            return # ไม่ต้องเปิด popup สรุปวันถ้าตายแล้ว (trigger_death จะเรียก popup เอง)
+            return 
 
         self.watered_today = False
         self.action_today = False
         self.care_days += 1
         
-        # เพิ่มพลังงานเต็ม 100 ทุกครั้งที่พักผ่อน
         app.stamina = 100
         
         weathers = ["แดดจัด", "ฝนตก", "เมฆมาก", "พายุเข้า"]
         app.weather = random.choice(weathers)
         
-        # สร้าง Layout สำหรับ Popup
         content = BoxLayout(orientation='vertical', padding=20, spacing=15)
         content.add_widget(Label(
             text=f"[b]สรุปการดูแลเมื่อวาน (วันที่ {self.care_days - 1})[/b]",
@@ -563,17 +567,14 @@ class GameScreen(Screen):
         btn.bind(on_release=popup.dismiss)
         popup.open()
         
-        # เราต้องเปิด markup ให้ label นี้ด้วย เพื่อแสดงตัวอักษรสีแดงถ้าโดนหักคะแนน
         self.ids.result_lbl.markup = True
         self.update_status(f"เช้าวันใหม่! อากาศ: {app.weather} | วันที่ {self.care_days}")
         
-        # เล่นเอนิเมชันกะพริบแจ้งเตือน ให้เห็นความเปลี่ยนแปลงของการข้ามวัน
         lbl = self.ids.result_lbl
         lbl.opacity = 0
         anim = Animation(opacity=1, duration=0.5)
         anim.start(lbl)
         
-        # คืนสเกลต้นไม้เป็นปกติในกรณีที่มันค้างจากการรดน้ำ
         sc = self.ids.flower_scatter
         Animation(scale=1.0, duration=0.3).start(sc)
         
