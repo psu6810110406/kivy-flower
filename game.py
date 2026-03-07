@@ -38,8 +38,8 @@ class GameScreen(Screen):
         
         # --- โหลดไฟล์เสียงเตรียมไว้ล่วงหน้า เพื่อไม่ให้เกมกระตุกตอนกด ---
         self.sound_water = SoundLoader.load('assets/sound/water.mp3')
-        self.sound_fertilizer = SoundLoader.load('assets/sound/fertilizer.mp3')
-        self.sound_till = SoundLoader.load('assets/sound/till.mp3')
+        self.sound_fertilizer = SoundLoader.load('assets/sound/sprinkle.mp3')
+        self.sound_till = SoundLoader.load('assets/sound/rake.mp3')
         self.sound_levelup = SoundLoader.load('assets/sound/levelup.mp3')
         # ----------------------------------------------------
 
