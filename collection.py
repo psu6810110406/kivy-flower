@@ -33,7 +33,7 @@ class DraggableFlower(Scatter):
             
         self.flower_type = self.flower_info["type"]
         self.size_hint = (None, None)
-        self.size = (300, 300)
+        self.size = (320, 320)
         self.do_rotation = False
         
         img_src = f"assets/images/{self.flower_type}_4.png"
@@ -132,7 +132,7 @@ class InventoryFlower(Image):
             self.flower_type = flower_data["type"]
             
         self.size_hint = (None, 1)
-        self.width = 120
+        self.size = (300, 300)
         img_src = f"assets/images/{self.flower_type}_3.png"
         if not os.path.exists(img_src): img_src = f"assets/images/{self.flower_type}_3.PNG"
         if not os.path.exists(img_src): img_src = "assets/images/flower_3.png"
